@@ -57,7 +57,7 @@ class CourseListCreate(generics.ListCreateAPIView):
         if self.request.user.type == 't':
             return Course.objects.filter(teacher=self.request.user)
         else:
-            return CourseStudent.objects.filter(course_id=self.kwargs['pk'])
+            return CourseStudent.objects.all()
 
 
 class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
