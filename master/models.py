@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import AbstractBaseUser, UserManager
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, UserManager
 
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
@@ -39,7 +39,7 @@ def user_image_directory_path(instance, filename):
     return 'user/{0}/image/{1}'.format(instance.photo, filename)
 
 
-class User(AbstractBaseUser):
+class User(PermissionsMixin, AbstractBaseUser):
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
     university = models.CharField(verbose_name="دانشگاه", max_length=50)
@@ -88,6 +88,8 @@ class UserManager(BaseUserManager):
             password=password
         )
         user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
         user.save(using=self._db)
         return user
 
