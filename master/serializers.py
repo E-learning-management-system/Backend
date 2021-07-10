@@ -81,7 +81,7 @@ class SigninSerializer(serializers.Serializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    teacher = serializers.ReadOnlyField(source='teacher.id')
+    teacher = serializers.ReadOnlyField(source='teacher.username')
 
     class Meta:
         model = Course
@@ -146,12 +146,12 @@ class PostAnswerserializer(serializers.ModelSerializer):
 
 
 class SubjectSerializer(serializers.ModelSerializer):
-    course = serializers.ReadOnlyField()
     course_id = serializers.ReadOnlyField(source='course.id')
+    course_name = serializers.ReadOnlyField(source='course.title')
 
     class Meta:
         model = Subject
-        fields = ['title', 'course', 'course_id']
+        fields = ['title', 'course_name', 'course_id']
 
 
 class ExerciseSerializer(serializers.ModelSerializer):

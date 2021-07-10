@@ -128,18 +128,13 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
             raise ValidationError('Access Denied')
 
 
-class SubjectListCreate(generics.ListCreateAPIView):
+class SubjectList(generics.ListAPIView):
     serializer_class = SubjectSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Subject.objects.filter(course_id=self.kwargs['pk'])
-
-    def perform_create(self, serializer):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
-        else:
-            serializer.save(course_id=self.kwargs['pk'], course=Course.objects.get(pk=self.kwargs['pk']))
+        if self.request.user.type == 't':
+            return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
 
 
 class ExerciseListCreate(generics.ListCreateAPIView):
