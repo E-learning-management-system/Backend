@@ -40,6 +40,7 @@ def user_image_directory_path(instance, filename):
 
 
 class User(PermissionsMixin, AbstractBaseUser):
+    VALID_PHOTO_EXTENTION = ['jpg', 'png', 'jpeg']
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
     university = models.CharField(verbose_name="دانشگاه", max_length=50)
@@ -53,10 +54,12 @@ class User(PermissionsMixin, AbstractBaseUser):
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
-    photo = models.ImageField(verbose_name="تصویر پروفایل", upload_to=user_photo_directory_path, null=True,
+    photo = models.ImageField(verbose_name="تصویر پروفایل", validators=[FileExtensionValidator(VALID_PHOTO_EXTENTION), validate_image_size],
+                              upload_to=user_photo_directory_path, null=True,
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
     REQUIRED_FIELDS = ['type', 'university']
+    USERNAME_FIELD = 'username'
     objects = UserManager()
 
     def __str__(self):
