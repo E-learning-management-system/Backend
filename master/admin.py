@@ -1,8 +1,19 @@
 from django.contrib import admin
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django import forms
+
 from master.models import Course, CourseStudent, Exercise, ExerciseAnswer, Tag, User, Post, PostComment, PostLike, \
     Subject
 
 admin.site.register(Tag)
+
+
+class UserChangeForm(forms.ModelForm):
+    password = ReadOnlyPasswordHashField()
+
+    class Meta:
+        model = User
+        fields = ('username', 'type', 'university','email', 'password')
 
 
 class ExerciseInline(admin.StackedInline):
