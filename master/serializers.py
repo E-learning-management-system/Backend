@@ -22,9 +22,9 @@ TYPE_CHOICES = [
 ]
 
 
-class SignupSerializer(serializers.Serializer, ABC):
+class SignupSerializer(serializers.Serializer):
     type = serializers.ChoiceField(TYPE_CHOICES)
-    university = serializers.CharField(label='', write_only=True)
+    university = serializers.CharField(label='دانشگاه', write_only=True)
     email = serializers.EmailField(label='ایمیل', write_only=True)
     username = serializers.CharField(label='نام کاربری', write_only=True)
     password = serializers.CharField(label='رمز عبور', min_length=4,
@@ -59,7 +59,7 @@ class SignupSerializer(serializers.Serializer, ABC):
         return user
 
 
-class SigninSerializer(serializers.Serializer, ABC):
+class SigninSerializer(serializers.Serializer):
     username = serializers.CharField(label='نام کاربری', write_only=True)
     password = serializers.CharField(label='رمز عبور', min_length=4,
                                      write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
@@ -81,9 +81,17 @@ class SigninSerializer(serializers.Serializer, ABC):
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    teacher = serializers.ReadOnlyField(source='teacher.id')
+
     class Meta:
         model = Course
         fields = ['id', 'title', 'description', 'teacher', 'start_date', 'end_date', 'exam_date']
+
+
+class CourseRUDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'description', 'start_date', 'exam_date']
 
 
 class CourseStudentSerializer(serializers.ModelSerializer):
@@ -97,10 +105,11 @@ class CourseStudentSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
+    course = serializers.ReadOnlyField
 
     class Meta:
         model = Post
-        fields = ['postId', 'poster', 'text', 'date', 'file', 'comments', 'likes']
+        fields = ['postId', 'poster', 'course', 'text', 'date', 'file', 'comments', 'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
@@ -125,6 +134,15 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostLike
         fields = ['user', 'post', 'date']
+
+
+class PostAnswerserializer(serializers.ModelSerializer):
+    post = serializers.ReadOnlyField
+    teacher = serializers.ReadOnlyField
+
+    class Meta:
+        model = PostAnswer
+        fields = ['post', 'teacher', ]
 
 
 class SubjectSerializer(serializers.ModelSerializer):

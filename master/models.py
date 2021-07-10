@@ -1,5 +1,7 @@
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin, AbstractUser, UserManager
+from django.contrib.admin.options import InlineModelAdmin
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin, AbstractUser, UserManager, AbstractBaseUser
+
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
@@ -39,7 +41,7 @@ def user_image_directory_path(instance, filename):
     return 'user/{0}/image/{1}'.format(instance.photo, filename)
 
 
-class User(AbstractUser):
+class User(AbstractUser, PermissionsMixin):
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
     university = models.CharField(verbose_name="دانشگاه", max_length=50)
@@ -47,6 +49,9 @@ class User(AbstractUser):
     username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
     type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES)
+    is_active = models.BooleanField(verbose_name='فعال', default=True)
+    is_staff = models.BooleanField(verbose_name='کارمند', default=False)
+    is_superuser = models.BooleanField(verbose_name='ابرکاربر', default=False)
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
@@ -54,13 +59,17 @@ class User(AbstractUser):
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
     REQUIRED_FIELDS = []
-    objects = UserManager()
 
     def __str__(self):
         if (self.first_name is not None) and (self.last_name is not None):
             return str(self.first_name + ' ' + self.last_name)
         else:
             return str(self.username)
+
+
+class Identity(models.Model):
+    user = models.OneToOneField(User, verbose_name='کاربر', on_delete=models.CASCADE)
+    identifier_image = models.ImageField()
 
 
 class Tag(models.Model):
@@ -115,6 +124,7 @@ class CourseStudent(models.Model):
 
 class Post(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
+    course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, default=None)
     postId = models.IntegerField(verbose_name='شماره پست', validators=[MaxValueValidator(20000)])
     poster = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
                                on_delete=models.CASCADE)
@@ -127,6 +137,7 @@ class Post(models.Model):
                             help_text='Image size should be less than {0}'.format(
                                 filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))
                             )
+    saved_by = models.ManyToManyField(User, verbose_name='ذخیره شده توسط', blank=True)
 
     def __str__(self):
         return str(self.postId)
@@ -147,6 +158,18 @@ class PostComment(models.Model):
         ordering = ['-date']
         verbose_name = 'کامنت'
         verbose_name_plural = 'کامنت ها'
+
+
+class PostAnswer(models.Model):
+    teacher = models.ForeignKey(User, verbose_name='استاد', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, verbose_name='پست', on_delete=models.CASCADE)
+    text = models.TextField(verbose_name='متن')
+    date = models.DateTimeField(verbose_name='ایجاد شده در: ', auto_now_add=True, null=True)
+
+    class Meta:
+        ordering = ['-date']
+        verbose_name = 'پاسخ استاد'
+        verbose_name_plural = 'پاسخ های اساتید'
 
 
 class PostLike(models.Model):

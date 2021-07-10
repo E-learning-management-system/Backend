@@ -6,9 +6,9 @@ urlpatterns = [
     path('api/', include('master.urls')),
     path('api-auth', include('rest_framework.urls')),
     path('signup/', ms.Signup.as_view(), name='signup'),
-    path('signin/', ms.Signin.as_view(), name='signin')
+    path('signin/', ms.Signin.as_view(), name='signin'),
 
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     # path('changepassword/', ms.user_change_password, name='user_change_password'),
 ]
 

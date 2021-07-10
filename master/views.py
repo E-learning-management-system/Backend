@@ -66,46 +66,66 @@ def user_change_password(request):
         return HttpResponse('GET Method')
 
 
-class CourseListCreate(generics.ListCreateAPIView):
-    serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def perform_create(self, serializer):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
-        else:
-            if self.request.method == 'POST':
-                data = JSONParser().parse(self.request)
-                startdate = data['start_date']
-                enddate = data['end_date']
-                examdate = data['exam_date']
-                if startdate > enddate:
-                    raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
-                elif examdate < startdate:
-                    raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
-                else:
-                    serializer.save(teacher=self.request.user)
-
-    def get_queryset(self):
-        if self.request.user.type == 't':
-            return Course.objects.filter(teacher=self.request.user)
-        else:
-            return CourseStudent.objects.all()
-
-
-class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
+class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Course.objects.filter(teacher=self.request.user)
+        if self.request.user.type == 't':
+            return Course.objects.filter(teacher=self.request.user)
+        elif self.request.user.type == 's':
+            return self.request.user.course_set.all()
+
+
+class CourseCreate(generics.CreateAPIView):
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        data = JSONParser().parse(self.request)
+        newtitle = data['title']
+        newdescription = data['description']
+        startdate = data['start_date']
+        enddate = data['end_date']
+        examdate = data['exam_date']
+        if startdate > enddate:
+            raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
+        elif examdate < startdate:
+            raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
+        else:
+            serializer.save(teacher=self.request.user, title=newtitle, description=newdescription, start_date=startdate,
+                            end_date=enddate, exam_date=examdate)
+
+
+class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CourseRUDSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_update(self, serializer):
+        data = JSONParser().parse(self.request)
+        enddate = data['end_date']
+        examdate = data['exam_date']
+        desc = data['description']
+        if self.request.user.type != 't':
+            raise ValidationError('Access Denied')
+        else:
+            serializer.save(end_date=enddate, description=desc, exam_date=examdate)
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Course.objects.get(teacher=self.request.user, pk=self.kwargs['pk'])
+        elif self.request.user.type == 's':
+            return self.request.user.course_set.get(pk=self.kwargs['pk'])
 
     def delete(self, request, *args, **kwargs):
-        course = Course.objects.get(pk=kwargs['pk'], teacher=self.request.user)
-        if course.exists():
+        if self.get_queryset().exists:
             return self.destroy(request, *args, **kwargs)
         else:
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+            raise ValidationError('Access Denied')
 
 
 class SubjectListCreate(generics.ListCreateAPIView):
