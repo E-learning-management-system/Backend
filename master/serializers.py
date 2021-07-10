@@ -54,8 +54,7 @@ class SignupSerializer(serializers.Serializer):
         username = validated_data['username']
         password = validated_data['password']
 
-        user = User.objects.create_user(username, email, password, type, university)
-
+        user = User.objects.create_user(username, type, university, email, password)
         return user
 
 
