@@ -22,7 +22,6 @@ class CourseSerializer(serializers.ModelSerializer):
 class CourseStudentSerializer(serializers.ModelSerializer):
     course = serializers.ReadOnlyField()
 
-
     class Meta:
         model = CourseStudent
         fields = ['user', 'course']

@@ -1,25 +1,43 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions
+from rest_framework.parsers import JSONParser
+from django.db import IntegrityError
+
+from rest_framework.authtoken.models import Token
 from .serializers import *
 
 
 @csrf_exempt
-def user_login(request):
+def signup(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            message = 'Login Successful!'
+        try:
+            data = JSONParser().parse(request)
+            user = User.objects.create_user(data['username'], password=data['password'])
+            user.save()
+            token = Token.objects.create(user=user)
+            return JsonResponse({'token': str(token)}, status=201)
+        except IntegrityError:
+            return JsonResponse({'error': 'That username has already been taken. Please choose a new username'},
+                                status=400)
+
+
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        user = authenticate(request, username=data['username'], password=data['password'])
+        if user is None:
+            return JsonResponse({'error': "'Couldn't find the user"},
+                                status=400)
         else:
-            message = 'Login Failed!'
-        return HttpResponse(message)
-    else:
-        return HttpResponse('GET Method')
+            try:
+                token = Token.objects.get(user=user)
+            except:
+                token = Token.objects.create(user=user)
+            return JsonResponse({'token': str(token)}, status=200)
 
 
 @csrf_exempt
@@ -51,7 +69,17 @@ class CourseListCreate(generics.ListCreateAPIView):
         if self.request.user.type != 't':
             raise ValidationError('شما به این عمل دسترسی ندارید')
         else:
-            serializer.save(teacher=self.request.user)
+            if self.request.method == 'POST':
+                data = JSONParser().parse(self.request)
+                startdate = data['start_date']
+                enddate = data['end_date']
+                examdate = data['exam_date']
+                if startdate > enddate:
+                    raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
+                elif examdate < startdate:
+                    raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
+                else:
+                    serializer.save(teacher=self.request.user)
 
     def get_queryset(self):
         if self.request.user.type == 't':

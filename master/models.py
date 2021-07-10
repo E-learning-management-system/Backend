@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin, AbstractUser
+from django.contrib.auth.models import PermissionsMixin, AbstractUser, UserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
@@ -7,10 +7,9 @@ from django.conf import settings
 from django.template.defaultfilters import filesizeformat
 
 
-def user_avatar_directory_path(instance, filename):
-    return 'user/{0}/avatar/{1}'.format(str(instance.user.username), filename)
+def user_photo_directory_path(instance, filename):
+    return 'user/{0}/photo/{1}'.format(str(instance.user.username), filename)
 
-# esghe man amir
 
 def user_identifier_image_directory_path(instance, filename):
     return 'user/{0}/identifier-image/{1}'.format(str(instance.user.username), filename)
@@ -50,14 +49,16 @@ class User(AbstractUser):
     university = models.CharField(verbose_name="دانشگاه", max_length=50)
     email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100)
     username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
-    password = models.CharField(verbose_name="رمز عبور", max_length=20)
+    password = models.TextField(verbose_name="رمز عبور", max_length=2000)
     type = models.CharField(verbose_name="نقش", max_length=15, choices=TYPE_CHOICES)
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
-    photo = models.ImageField(verbose_name="تصویر پروفایل", null=True, blank=True)
+    photo = models.ImageField(verbose_name="تصویر پروفایل", upload_to=user_photo_directory_path, null=True,
+                              blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
     REQUIRED_FIELDS = []
+    objects = UserManager()
 
     def __str__(self):
         if (self.first_name is not None) and (self.last_name is not None):
@@ -86,6 +87,7 @@ class Course(models.Model):
     start_date = models.DateTimeField(verbose_name='تاریخ آغاز', default=None)
     end_date = models.DateTimeField(verbose_name='تاریخ پایان')
     exam_date = models.DateTimeField(verbose_name='تاریخ امتحان')
+    student = models.ManyToManyField(User, verbose_name='دانشجویان', through='CourseStudent', blank=True)
 
     def __str__(self):
         if self.teacher.last_name is not None:
@@ -186,7 +188,7 @@ class Exercise(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
     status = models.CharField(max_length=30, verbose_name='وضعیت', choices=Exercise_Status_choices, default='e')
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
-    deadline = models.DateTimeField(verbose_name='مهلت تحویل',null=True)
+    deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
     tags = models.ManyToManyField(Tag, blank=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
