@@ -19,10 +19,6 @@ def post_image_directory_path(instance, filename):
     return 'user/{0}/post/{1}'.format(str(instance.user.username), filename)
 
 
-def topic_image_directory_path(instance, filename):
-    return 'topic/{0}/image/{1}'.format(instance.user, filename)
-
-
 def user_files_directory_path(instance, filename):
     return 'user/{0}/files/{1}'.format(str(instance.message.user.username), filename)
 
@@ -50,7 +46,7 @@ class User(AbstractUser):
     email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100)
     username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
-    type = models.CharField(verbose_name="نقش", max_length=15, choices=TYPE_CHOICES)
+    type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES)
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)

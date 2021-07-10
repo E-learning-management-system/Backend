@@ -1,49 +1,54 @@
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics, permissions
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework import generics, permissions, status
 from rest_framework.parsers import JSONParser
-from django.db import IntegrityError
 
 from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+
 from .serializers import *
 
 
-@csrf_exempt
-def signup(request):
-    if request.method == 'POST':
-        try:
-            data = JSONParser().parse(request)
-            user = User.objects.create_user(data['username'], password=data['password'])
-            user.save()
-            token = Token.objects.create(user=user)
-            return JsonResponse({'token': str(token)}, status=201)
-        except IntegrityError:
-            return JsonResponse({'error': 'That username has already been taken. Please choose a new username'},
-                                status=400)
+class Signup(generics.CreateAPIView):
+    serializer_class = SignupSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary='Create a new user',
+        responses={
+            201: OpenApiResponse(response=SignupSerializer, description='created'),
+            400: OpenApiResponse(description='correctly fill the necessary fields')
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        user = User.objects.get(email=serializer.validated_data['email'],
+                                type=serializer.validated_data['type'],
+                                university=serializer.validated_data['university'])
+        token, create = Token.objects.get_or_create(user=user)
+        data = {'token': token.key}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-@csrf_exempt
-def login(request):
-    if request.method == 'POST':
-        data = JSONParser().parse(request)
-        user = authenticate(request, username=data['username'], password=data['password'])
-        if user is None:
-            return JsonResponse({'error': "'Couldn't find the user"},
-                                status=400)
-        else:
-            try:
-                token = Token.objects.get(user=user)
-            except:
-                token = Token.objects.create(user=user)
-            return JsonResponse({'token': str(token)}, status=200)
+class Signin(generics.GenericAPIView):
+    serializer_class = SigninSerializer
+    permissions = [permissions.AllowAny]
 
-
-@csrf_exempt
-def user_logout(request):
-    logout(request)
-    return HttpResponse('Logout Successful!')
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, create = Token.objects.get_or_create(user=user)
+        data = {'token': token.key}
+        return Response(data)
 
 
 @csrf_exempt
