@@ -1,8 +1,6 @@
-from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin, AbstractUser, UserManager, AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, UserManager
 
-from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
 from django.conf import settings
@@ -41,7 +39,7 @@ def user_image_directory_path(instance, filename):
     return 'user/{0}/image/{1}'.format(instance.photo, filename)
 
 
-class User(AbstractUser, PermissionsMixin):
+class User(AbstractBaseUser):
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
     university = models.CharField(verbose_name="دانشگاه", max_length=50)
@@ -58,7 +56,8 @@ class User(AbstractUser, PermissionsMixin):
     photo = models.ImageField(verbose_name="تصویر پروفایل", upload_to=user_photo_directory_path, null=True,
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['type', 'university']
+    objects = UserManager()
 
     def __str__(self):
         if (self.first_name is not None) and (self.last_name is not None):
@@ -67,9 +66,30 @@ class User(AbstractUser, PermissionsMixin):
             return str(self.username)
 
 
-class Identity(models.Model):
-    user = models.OneToOneField(User, verbose_name='کاربر', on_delete=models.CASCADE)
-    identifier_image = models.ImageField()
+class UserManager(BaseUserManager):
+
+    def create_user(self, username, type=None, university=None, email=None, password=None):
+        if not username:
+            raise ValueError('Users must have a username')
+
+        user = self.model(
+            username=self.normalize_username(username),
+            type=type,
+            university=university,
+            email=email
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None):
+        user = self.create_user(
+            username=username,
+            password=password
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
 
 
 class Tag(models.Model):

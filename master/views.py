@@ -30,9 +30,9 @@ class Signup(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        user = User.objects.get(email=serializer.validated_data['email'],
-                                type=serializer.validated_data['type'],
-                                university=serializer.validated_data['university'])
+        user = User.objects.get(type=serializer.validated_data['type'],
+                                university=serializer.validated_data['university'],
+                                email=serializer.validated_data['email'])
         token, create = Token.objects.get_or_create(user=user)
         data = {'token': token.key}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
