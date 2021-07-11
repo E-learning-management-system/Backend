@@ -151,14 +151,13 @@ class CourseStudent(models.Model):
 class Post(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, default=None)
-    postId = models.IntegerField(verbose_name='شماره پست', validators=[MaxValueValidator(20000)])
     poster = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
                                on_delete=models.CASCADE)
     text = models.TextField(verbose_name='متن')
     date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
     file = models.FileField(upload_to=post_image_directory_path, null=True, blank=True,
                             validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
-                            verbose_name='آواتار',
+                            verbose_name='فایل',
 
                             help_text='Image size should be less than {0}'.format(
                                 filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))

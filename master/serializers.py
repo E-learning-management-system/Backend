@@ -110,28 +110,41 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class CourseRUDSerializer(serializers.ModelSerializer):
+    teacher = serializers.ReadOnlyField(source='teacher.username')
+    course_title = serializers.ReadOnlyField(source='course.title')
+
     class Meta:
         model = Course
-        fields = ['id', 'description', 'start_date', 'exam_date']
+        fields = ['id', 'course_title', 'teacher', 'description', 'start_date', 'end_date', 'exam_date']
 
 
 class CourseStudentSerializer(serializers.ModelSerializer):
-    course = serializers.ReadOnlyField(source='course.id')
+    course_id = serializers.ReadOnlyField(source='course.id')
+    course_title = serializers.ReadOnlyField(source='course.title')
+    course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
     user = serializers.ReadOnlyField(source='user.username')
+    user_id = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = CourseStudent
-        fields = ['user', 'course']
+        fields = ['id', 'user', 'user_id', 'course_id', 'course_title', 'course_teacher']
 
 
 class PostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
-    course = serializers.ReadOnlyField
+
+    course_id = serializers.ReadOnlyField(source='course.id')
+    course_title = serializers.ReadOnlyField(source='course.title')
+    course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
+    poster_id = serializers.ReadOnlyField(source='poster.id')
+    poster_username = serializers.ReadOnlyField(source='poster.username')
 
     class Meta:
         model = Post
-        fields = ['postId', 'poster', 'course', 'text', 'date', 'file', 'comments', 'likes']
+        fields = ['id', 'poster_id', 'poster_username', 'course_teacher', 'course_id', 'course_title', 'text', 'date',
+                  'file', 'comments',
+                  'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
@@ -170,10 +183,11 @@ class PostAnswerSerializer(serializers.ModelSerializer):
 class SubjectSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_name = serializers.ReadOnlyField(source='course.title')
+    teacher = serializers.ReadOnlyField(source='course.teacher.username')
 
     class Meta:
         model = Subject
-        fields = ['id', 'title', 'course_name', 'course_id']
+        fields = ['id', 'title', 'course_name', 'course_id', 'teacher']
 
 
 ############################################################################################
