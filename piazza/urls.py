@@ -8,10 +8,11 @@ urlpatterns = [
     path('api/', include('master.urls')),
     path('api-auth', include('rest_framework.urls')),
     path('signup/', ms.Signup.as_view(), name='signup'),
+    # path('signup/EmailConfirmation', ms.Signup.as_view(), name='signup'),
     path('signin/', ms.Signin.as_view(), name='signin'),
+    path('signin/forgotpassword/', ms.ForgotPassword, name='forgot_password'),  # HasProblem
 
     path('admin/', admin.site.urls),
-    # path('changepassword/', ms.user_change_password, name='user_change_password'),
 
     # documentations
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

@@ -1,9 +1,7 @@
-from django.http import HttpResponse
 from datetime import datetime
-from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
-from rest_framework.parsers import JSONParser
 
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -51,19 +49,18 @@ class Signin(generics.GenericAPIView):
         return Response(data)
 
 
-@csrf_exempt
-def user_change_password(request):
-    if request.method == 'POST':
-        try:
-            new_password = request.POST['new_password']
-            u = request.user
-            u.set_password(new_password)
-            u.save()
-            return HttpResponse('Password Changed Successfully!')
-        except:
-            return HttpResponse('Password Changed Process Failed!')
-    else:
-        return HttpResponse('GET Method')
+class ForgotPassword(generics.GenericAPIView):
+    serializer_class = ForgotPasswordSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        data = {'نام کاربری : ': user.username, '\nکلمه عبور : ': user.password}
+        send_mail('بازیابی کلمه عبور',
+                  data,
+                  'no-reply-khu@markop.ir',
+                  [user.email])
 
 
 class CourseList(generics.ListAPIView):
