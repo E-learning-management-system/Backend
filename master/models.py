@@ -54,7 +54,8 @@ class User(PermissionsMixin, AbstractBaseUser):
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
-    photo = models.ImageField(verbose_name="تصویر پروفایل", validators=[FileExtensionValidator(VALID_PHOTO_EXTENTION), validate_image_size],
+    photo = models.ImageField(verbose_name="تصویر پروفایل",
+                              validators=[FileExtensionValidator(VALID_PHOTO_EXTENTION), validate_image_size],
                               upload_to=user_photo_directory_path, null=True,
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
@@ -95,18 +96,6 @@ class UserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
-
-
-class Tag(models.Model):
-    title = models.CharField(max_length=600)
-    link = models.CharField(max_length=1000)
-
-    def __str__(self):
-        return str(self.title)
-
-    class Meta:
-        verbose_name = 'تگ'
-        verbose_name_plural = 'تگ ها'
 
 
 class Course(models.Model):
@@ -208,12 +197,6 @@ class PostLike(models.Model):
         ordering = ['-date']
 
 
-Exercise_Status_choices = [
-    ('e', 'بی پاسخ'),
-    ('a', 'پاسخ داده شده'),
-]
-
-
 class Subject(models.Model):
     title = models.CharField(verbose_name='عنوان', max_length=100)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE)
@@ -225,6 +208,14 @@ class Subject(models.Model):
         verbose_name = 'مبحث'
         verbose_name_plural = 'مباحث'
 
+##############################################################################
+
+
+Exercise_Status_choices = [
+    ('e', 'بی پاسخ'),
+    ('a', 'پاسخ داده شده'),
+]
+
 
 class Exercise(models.Model):
     title = models.CharField(max_length=100, verbose_name='عنوان', unique=True)
@@ -233,7 +224,7 @@ class Exercise(models.Model):
     status = models.CharField(max_length=30, verbose_name='وضعیت', choices=Exercise_Status_choices, default='e')
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
-    tags = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField('Tag', blank=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
 
@@ -259,3 +250,15 @@ class ExerciseAnswer(models.Model):
 
     def __str__(self):
         return '{0} on {1}'.format(self.user, self.date)
+
+
+class Tag(models.Model):
+    title = models.CharField(max_length=600)
+    link = models.CharField(max_length=1000)
+
+    def __str__(self):
+        return str(self.title)
+
+    class Meta:
+        verbose_name = 'تگ'
+        verbose_name_plural = 'تگ ها'

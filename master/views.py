@@ -144,7 +144,6 @@ class CourseStudentCreate(generics.CreateAPIView):
         pass
 
 
-
 class SubjectCreate(generics.CreateAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -185,6 +184,41 @@ class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
+###########################################################################################
+class ExerciseList(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Exercise.objects.filter(author=self.request.user)
+        elif self.request.user.type == 's':
+            return self.request.user.exercise_set.all()
+
+
+class ExerciseCreate(generics.CreateAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        """data = JSONParser().parse(self.request)
+        newtitle = data['title']
+        newdescription = data['description']
+        startdate = data['start_date']
+        enddate = data['end_date']
+        examdate = data['exam_date']
+        if startdate > enddate:
+            raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
+        elif examdate < startdate:
+            raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
+        else:"""
+        serializer.save(author=self.request.user)
+
+
 class ExerciseListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -209,7 +243,7 @@ class ExerciseRUD(generics.RetrieveDestroyAPIView):
 
 
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
-    serializer_class = ExAnswerSerializer
+    serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -224,3 +258,67 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.user.type == 't':
             return ExerciseAnswer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk']))
+
+
+class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ExerciseAnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = ExerciseAnswer.objects.all()
+
+    def delete(self, request, *args, **kwargs):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+        exerciseAnswer = ExerciseAnswer.objects.filter(pk=kwargs['pk'])
+        if exerciseAnswer.exists():
+            return self.destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+        serializer.save(author=self.request.user)
+
+
+class ExerciseAnswerList(generics.ListAPIView):
+    serializer_class = ExerciseAnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return ExerciseAnswer.objects.get(pk=self.kwargs['pk'], author=self.request.user).ExerciseAnswer_set.all()
+        if self.request.user.type == 's':
+            return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
+
+
+class ExerciseAnswerCreate(generics.CreateAPIView):
+    serializer_class = ExerciseAnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        serializer.save(exercise=Exercise.objects.get(pk=self.kwargs['pk']))
+
+
+class TagCreate(generics.CreateAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        serializer.save(exercise=Exercise.objects.get(pk=self.kwargs['pk']))
+
+
+class TagList(generics.ListAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Exercise.objects.get(pk=self.kwargs['pk'], author=self.request.user).tag_set.all()
+        if self.request.user.type == 's':
+            return self.request.user.exercise_set.get(pk=self.kwargs['pk']).tag_set.all()

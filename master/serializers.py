@@ -151,9 +151,10 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['id','title', 'course_name', 'course_id']
+        fields = ['id', 'title', 'course_name', 'course_id']
 
 
+############################################################################################
 class ExerciseSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     subject = serializers.ReadOnlyField()
@@ -164,7 +165,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
         fields = ['id', 'course', 'subject', 'author', 'title', 'description', 'date', 'deadline']
 
 
-class ExAnswerSerializer(serializers.ModelSerializer):
+class ExerciseAnswerSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     exercise = serializers.ReadOnlyField()
 

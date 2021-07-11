@@ -10,7 +10,15 @@ urlpatterns = [
     path('courses/<int:pk>/subjects', ms.SubjectList.as_view()),
     path('courses/<int:pk>/newsubject', ms.SubjectCreate.as_view()),
     path('subject-rud/<int:pk>', ms.SubjectRUD.as_view()),
-    path('exercises/', ms.ExerciseListCreate.as_view()),
-    path('exercises/<int:pk>', ms.ExerciseRUD.as_view()),
-    path('exercises/<int:pk>/answers', ms.ExerciseAnswerListCreate.as_view())
+
+    #################################################################
+    path('exercises/', ms.ExerciseList.as_view()),
+    path('newexercise/', ms.ExerciseCreate.as_view()),
+
+    path('exercises-rud/<int:pk>', ms.ExerciseRUD.as_view()),
+    path('exercises/<int:pk>/answers', ms.ExerciseAnswerList.as_view()),
+    path('exercises/<int:pk>/newanswer', ms.ExerciseAnswerCreate.as_view()),
+    path('exerciseanswer-rud/<int:pk>', ms.ExerciseAnswerRUD.as_view()),
+    path('exercises/<int:pk>/tags', ms.TagList.as_view()),
+    path('exercises/<int:pk>/newtag', ms.TagCreate.as_view()),
 ]
