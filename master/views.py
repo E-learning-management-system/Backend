@@ -51,6 +51,7 @@ class Signin(generics.GenericAPIView):
 
 class ForgotPassword(generics.GenericAPIView):
     serializer_class = ForgotPasswordSerializer
+    permissions = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -62,6 +63,14 @@ class ForgotPassword(generics.GenericAPIView):
                   'no-reply-khu@markop.ir',
                   [user.email])
         return Response(status=status.HTTP_200_OK)
+
+
+class profile(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class CourseList(generics.ListAPIView):
@@ -214,7 +223,6 @@ class PostRUD(generics.RetrieveDestroyAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
-
 
 
 class PostCreate(generics.CreateAPIView):

@@ -5,13 +5,12 @@ from .models import *
 
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField()
+    email = serializers.ReadOnlyField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password', 'university', 'type', 'first_name', 'last_name',
-                  'phone',
-                  'state', 'city',
-                  'photo', 'date_joined']
+                  'phone', 'state', 'city', 'photo', 'date_joined']
 
 
 TYPE_CHOICES = [
@@ -77,28 +76,23 @@ class SigninSerializer(serializers.Serializer):
         return attrs
 
 
-class ForgotPasswordSerializer(serializers.ModelSerializer):
+class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 
     def validate(self, attrs):
         email = attrs.get('email')
         if email:
-            user = authenticate(request=self.context.get('request'),
-                                email=email)
+            user = User.objects.filter(email)
+            if user.exist():
+                user = user.first()
             if not user:
                 raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
         else:
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
         attrs['user'] = user
-        return attrs
-
-    class Meta:
-        model = User
-        username = serializers.ReadOnlyField(source='user.username')
-        password = serializers.ReadOnlyField(source='user.password')
-        fields = ['id', 'username', 'email', 'password']
+        return user
 
 
 class CourseSerializer(serializers.ModelSerializer):

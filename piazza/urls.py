@@ -10,10 +10,10 @@ urlpatterns = [
     path('signup/', ms.Signup.as_view(), name='signup'),
     # path('signup/EmailConfirmation', ms.Signup.as_view(), name='signup'),
     path('signin/', ms.Signin.as_view(), name='signin'),
-    path('signin/forgotpassword/', ms.ForgotPassword, name='forgot_password'),  # HasProblem
+    path('signin/forgotpassword/', ms.ForgotPassword.as_view(), name='forgot_password'),
+    path('profile/', ms.profile.as_view(), name='profile'),
 
     path('admin/', admin.site.urls),
-
     # documentations
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
