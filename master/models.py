@@ -103,12 +103,18 @@ class User(PermissionsMixin, AbstractBaseUser):
     USERNAME_FIELD = 'username'
     objects = UserManager()
 
+
+
     def __str__(self):
         if (self.first_name is not None) and (self.last_name is not None):
             return str(self.first_name + ' ' + self.last_name)
         else:
             return str(self.username)
 
+    class Meta:
+        verbose_name = 'کاربر'
+        verbose_name_plural = 'کاربران'
+        ordering = ['username']
 
 class Course(models.Model):
     title = models.CharField(verbose_name='عنوان', max_length=255)

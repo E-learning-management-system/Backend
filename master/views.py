@@ -190,7 +190,7 @@ class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         if self.request.user.type != 't':
             raise ValidationError('شما به این عمل دسترسی ندارید')
-        subject = Subject.objects.filter(pk=kwargs['pk'])
+        subject = Subject.objects.filter(pk=kwargs['pk'], course__teacher=self.request.user)
         if subject.exists():
             return self.destroy(request, *args, **kwargs)
 
@@ -208,6 +208,13 @@ class PostList(generics.ListAPIView):
             return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).post_set.all()
         if self.request.user.type == 's':
             return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
+
+
+class PostRUD(generics.RetrieveDestroyAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Post.objects.all()
+
 
 
 class PostCreate(generics.CreateAPIView):
