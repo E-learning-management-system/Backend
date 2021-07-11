@@ -78,9 +78,8 @@ class SigninSerializer(serializers.Serializer):
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
-    token = serializers.CharField(label='توکن', read_only=True)
 
-    def validate(self, attrs):
+    def check(self, attrs):
         email = attrs.get('email')
         if email:
             user = User.objects.filter(email)
@@ -92,7 +91,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
         attrs['user'] = user
-        return user
+        return attrs
 
 
 class CourseSerializer(serializers.ModelSerializer):
