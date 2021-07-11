@@ -1,6 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, UserManager
-
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
 from django.conf import settings
@@ -208,9 +207,8 @@ class Subject(models.Model):
         verbose_name = 'مبحث'
         verbose_name_plural = 'مباحث'
 
+
 ##############################################################################
-
-
 Exercise_Status_choices = [
     ('e', 'بی پاسخ'),
     ('a', 'پاسخ داده شده'),
@@ -238,7 +236,7 @@ class Exercise(models.Model):
 
 
 class ExerciseAnswer(models.Model):
-    exercise = models.ForeignKey(Exercise, verbose_name='تمرین', on_delete=models.CASCADE)
+    exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)
     file = models.FileField(verbose_name='فایل پاسخ', null=True)
     date = models.DateTimeField(auto_now_add=True, null=True, verbose_name='تاریخ بارگزاری')
