@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+
 from master import views as ms
 
 urlpatterns = [
@@ -10,6 +12,12 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     # path('changepassword/', ms.user_change_password, name='user_change_password'),
+
+    # documentations
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 APP_NAME = 'Piazza'

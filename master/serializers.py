@@ -171,7 +171,7 @@ class ExerciseAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExerciseAnswer
-        fields = ['id', 'user', 'exercise', 'text', 'date', 'time']
+        fields = ['id', 'user', 'exercise', 'file', 'date']
 
 
 class TagSerializer(serializers.ModelSerializer):
