@@ -141,7 +141,24 @@ class CourseStudentCreate(generics.CreateAPIView):
             raise ValidationError('Access Denied')
 
     def perform_create(self, serializer):
-        pass
+        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']))
+
+
+class CourseStudentRD(generics.RetrieveDestroyAPIView):
+    serializer_class = CourseStudentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CourseStudent.objects.all()
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('Access Denied')
+
+    def delete(self, request, *args, **kwargs):
+        student = CourseStudent.objects.filter(pk=kwargs['pk'], course__teacher=self.request.user)
+        if student.exists():
+            return self.destroy(self, request, *args, **kwargs)
+        else:
+            raise ValidationError('Access Denied')
 
 
 class SubjectCreate(generics.CreateAPIView):
@@ -182,6 +199,35 @@ class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         if self.request.user.type != 't':
             raise ValidationError('شما به این عمل دسترسی ندارید')
+
+
+class PostList(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).post_set.all()
+        if self.request.user.type == 's':
+            return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
+
+
+class PostCreate(generics.CreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type == 't':
+            if Course.objects.get(pk=self.kwargs['pk']).teacher != self.request.user:
+                raise ValidationError('شما به این عمل دسترسی ندارید')
+        elif self.request.user.type == 's':
+            user = self.request.user.course_set.filter(pk=self.kwargs['pk'])
+            if not user:
+                raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+
+        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']), poster=self.request.user)
 
 
 ###########################################################################################

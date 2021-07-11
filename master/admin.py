@@ -60,8 +60,8 @@ class CommentAdmin(admin.ModelAdmin):
 
 class PostAdmin(admin.ModelAdmin):
     inlines = [CommentInline, LikeInline]
-    list_filter = ['poster', 'postId', 'date']
-    list_display = ['postId', 'poster', 'file', 'date']
+    list_filter = ['poster', 'id', 'date']
+    list_display = ['id', 'poster', 'file', 'date']
 
 
 class ExerciseAnswerInline(admin.StackedInline):
