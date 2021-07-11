@@ -75,14 +75,16 @@ class UserManager(BaseUserManager):
     def create_user(self, username, type=None, university=None, email=None, password=None):
         if not username:
             raise ValueError('Users must have a username')
+        if not email:
+            raise ValueError('Users must have an email')
 
         user = self.model(
             username=self.normalize_username(username),
-            type=type,
-            university=university,
             email=email
         )
         user.set_password(password)
+        user.type(type)
+        user.university(university)
         user.save(using=self._db)
         return user
 
@@ -207,6 +209,7 @@ class Subject(models.Model):
     class Meta:
         verbose_name = 'مبحث'
         verbose_name_plural = 'مباحث'
+
 
 ##############################################################################
 

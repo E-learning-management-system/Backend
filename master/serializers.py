@@ -1,4 +1,3 @@
-from abc import ABC
 
 from django.contrib.auth import authenticate
 from rest_framework import serializers
@@ -23,7 +22,7 @@ TYPE_CHOICES = [
 
 
 class SignupSerializer(serializers.Serializer):
-    type = serializers.ChoiceField(TYPE_CHOICES)
+    type = serializers.ChoiceField(TYPE_CHOICES, label='نقش')
     university = serializers.CharField(label='دانشگاه', write_only=True)
     email = serializers.EmailField(label='ایمیل', write_only=True)
     username = serializers.CharField(label='نام کاربری', write_only=True)
