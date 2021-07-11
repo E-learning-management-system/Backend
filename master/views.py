@@ -86,7 +86,7 @@ class CourseCreate(generics.CreateAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        data = JSONParser().parse(self.request)
+        """data = JSONParser().parse(self.request)
         newtitle = data['title']
         newdescription = data['description']
         startdate = data['start_date']
@@ -96,36 +96,65 @@ class CourseCreate(generics.CreateAPIView):
             raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
         elif examdate < startdate:
             raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
-        else:
-            serializer.save(teacher=self.request.user, title=newtitle, description=newdescription, start_date=startdate,
-                            end_date=enddate, exam_date=examdate)
+        else:"""
+        serializer.save(teacher=self.request.user)
 
 
 class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CourseRUDSerializer
     permission_classes = [permissions.IsAuthenticated]
-
-    def perform_update(self, serializer):
-        data = JSONParser().parse(self.request)
-        enddate = data['end_date']
-        examdate = data['exam_date']
-        desc = data['description']
-        if self.request.user.type != 't':
-            raise ValidationError('Access Denied')
-        else:
-            serializer.save(end_date=enddate, description=desc, exam_date=examdate)
-
-    def get_queryset(self):
-        if self.request.user.type == 't':
-            return Course.objects.get(teacher=self.request.user, pk=self.kwargs['pk'])
-        elif self.request.user.type == 's':
-            return self.request.user.course_set.get(pk=self.kwargs['pk'])
+    queryset = Course.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        if self.get_queryset().exists:
-            return self.destroy(request, *args, **kwargs)
+        course = Course.objects.filter(teacher=self.request.user, pk=self.kwargs['pk'])
+        if self.request.user.type == 't':
+            if course.exists():
+                return self.destroy(request, *args, **kwargs)
+            else:
+                raise ValidationError('شما به این عمل دسترسی ندارید')
         else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_update(self, serializer):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+
+class CourseStudentList(generics.ListAPIView):
+    serializer_class = CourseStudentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def get_queryset(self):
+        return CourseStudent.objects.filter(course=self.kwargs['pk'])
+
+
+class CourseStudentCreate(generics.CreateAPIView):
+    serializer_class = CourseStudentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
             raise ValidationError('Access Denied')
+
+    def perform_create(self, serializer):
+        pass
+
+
+
+class SubjectCreate(generics.CreateAPIView):
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']))
 
 
 class SubjectList(generics.ListAPIView):
@@ -135,6 +164,25 @@ class SubjectList(generics.ListAPIView):
     def get_queryset(self):
         if self.request.user.type == 't':
             return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
+        if self.request.user.type == 's':
+            return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
+
+
+class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Subject.objects.all()
+
+    def delete(self, request, *args, **kwargs):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+        subject = Subject.objects.filter(pk=kwargs['pk'])
+        if subject.exists():
+            return self.destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
 class ExerciseListCreate(generics.ListCreateAPIView):

@@ -94,7 +94,8 @@ class CourseRUDSerializer(serializers.ModelSerializer):
 
 
 class CourseStudentSerializer(serializers.ModelSerializer):
-    course = serializers.ReadOnlyField()
+    course = serializers.ReadOnlyField(source='course.id')
+    user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = CourseStudent
@@ -135,13 +136,13 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ['user', 'post', 'date']
 
 
-class PostAnswerserializer(serializers.ModelSerializer):
+class PostAnswerSerializer(serializers.ModelSerializer):
     post = serializers.ReadOnlyField
     teacher = serializers.ReadOnlyField
 
     class Meta:
         model = PostAnswer
-        fields = ['post', 'teacher', ]
+        fields = ['post', 'teacher']
 
 
 class SubjectSerializer(serializers.ModelSerializer):
@@ -150,7 +151,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['title', 'course_name', 'course_id']
+        fields = ['id','title', 'course_name', 'course_id']
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
