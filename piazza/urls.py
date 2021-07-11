@@ -5,8 +5,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from master import views as ms
 
 urlpatterns = [
-    path('api/', include('master.urls')),
-    path('api-auth', include('rest_framework.urls')),
+    path('soren/', include('master.urls')),
+    path('soren-auth', include('rest_framework.urls')),
     path('signup/', ms.Signup.as_view(), name='signup'),
     # path('signup/EmailConfirmation', ms.Signup.as_view(), name='signup'),
     path('signin/', ms.Signin.as_view(), name='signin'),

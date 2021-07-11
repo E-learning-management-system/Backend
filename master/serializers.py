@@ -156,12 +156,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
-    post = serializers.ReadOnlyField()
-    user = serializers.ReadOnlyField()
+    post_id = serializers.ReadOnlyField(source='post.id')
+    user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = PostLike
-        fields = ['user', 'post', 'date']
+        fields = ['user', 'post_id', 'date']
 
 
 class PostAnswerSerializer(serializers.ModelSerializer):

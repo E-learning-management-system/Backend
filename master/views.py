@@ -217,11 +217,22 @@ class PostList(generics.ListAPIView):
             return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
 
 
-class PostRUD(generics.RetrieveDestroyAPIView):
+class PostRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
 
+    def delete(self, request, *args, **kwargs):
+        post = Post.objects.filter(pk=kwargs['pk'], poster=self.request.user)
+        if post.exists():
+            return self.destroy(request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_update(self, serializer):
+        post = Post.objects.filter(pk=self.kwargs['pk'], poster=self.request.user)
+        if not post:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
 class PostCreate(generics.CreateAPIView):
     serializer_class = PostSerializer
@@ -239,6 +250,29 @@ class PostCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
 
         serializer.save(course=Course.objects.get(pk=self.kwargs['pk']), poster=self.request.user)
+
+
+class LikeCreate(generics.CreateAPIView):
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        post = Post.objects.get(pk=self.kwargs['pk'])
+        like = PostLike.objects.filter(post=post, user=self.request.user)
+        if like.exists():
+            raise ValidationError('شما این پست را لایک کرده اید')
+        if not post:
+            raise ValidationError('نتیجه ای یافت نشد')
+        else:
+            serializer.save()
+
+
+class LikeList(generics.ListAPIView):
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return PostLike.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
 
 
 ###########################################################################################

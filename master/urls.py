@@ -13,7 +13,9 @@ urlpatterns = [
     path('subject-rud/<int:pk>/', ms.SubjectRUD.as_view()),
     path('courses/<int:pk>/newpost/', ms.PostCreate.as_view()),
     path('courses/<int:pk>/posts/', ms.PostList.as_view()),
-    path('post-rud/', ms.PostRUD.as_view()),
+    path('post-rud/<int:pk>', ms.PostRUD.as_view()),
+    path('posts/<int:pk>/newlike', ms.LikeCreate.as_view()),
+    path('posts/<int:pk>/likes', ms.LikeList.as_view()),
 
     #################################################################
     path('exercises/', ms.ExerciseList.as_view()),
