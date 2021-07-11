@@ -38,6 +38,36 @@ def user_image_directory_path(instance, filename):
     return 'user/{0}/image/{1}'.format(instance.photo, filename)
 
 
+class UserManager(BaseUserManager):
+
+    def create_user(self, username, type=None, university=None, email=None, password=None):
+        if not username:
+            raise ValueError('Users must have a username')
+        if not email:
+            raise ValueError('Users must have an email')
+
+        user = self.model(
+            username=username,
+            type=type,
+            university=university,
+            email=email
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None):
+        user = self.create_user(
+            username=username,
+            password=password
+        )
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+
 class User(PermissionsMixin, AbstractBaseUser):
     VALID_PHOTO_EXTENTION = ['jpg', 'png', 'jpeg']
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
@@ -67,36 +97,6 @@ class User(PermissionsMixin, AbstractBaseUser):
             return str(self.first_name + ' ' + self.last_name)
         else:
             return str(self.username)
-
-
-class UserManager(BaseUserManager):
-
-    def create_user(self, username, type=None, university=None, email=None, password=None):
-        if not username:
-            raise ValueError('Users must have a username')
-        if not email:
-            raise ValueError('Users must have an email')
-
-        user = self.model(
-            username=self.normalize_username(username),
-            email=email
-        )
-        user.set_password(password)
-        user.type(type)
-        user.university(university)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, password=None):
-        user = self.create_user(
-            username=username,
-            password=password
-        )
-        user.is_admin = True
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
 
 
 class Course(models.Model):
