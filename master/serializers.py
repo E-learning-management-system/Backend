@@ -1,4 +1,3 @@
-
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from .models import *
@@ -76,6 +75,24 @@ class SigninSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class ForgotPasswordSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(label='ایمیل', write_only=True)
+    token = serializers.CharField(label='توکن', read_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        if email:
+            user = authenticate(request=self.context.get('request'),
+                                email=email)
+            if not user:
+                raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
+        else:
+            raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
+
+        attrs['user'] = user
+        return user
 
 
 class CourseSerializer(serializers.ModelSerializer):

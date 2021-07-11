@@ -61,10 +61,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, type=None, university=None, email=None, password=None):
+    def create_superuser(self, username, email=None, password=None):
         if not username:
             raise ValueError('Users must have a username')
-
         if not password:
             raise ValueError('Users must have a password')
 
