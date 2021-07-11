@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, UserManager
+from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
 from django.conf import settings
@@ -29,8 +29,9 @@ def validate_image_size(image):
 
 
 TYPE_CHOICES = [
+    ('a', 'ادمین'),
     ('t', 'استاد'),
-    ('s', 'دانشجو'),
+    ('s', 'دانشجو')
 ]
 
 
@@ -43,8 +44,12 @@ class UserManager(BaseUserManager):
     def create_user(self, username, type=None, university=None, email=None, password=None):
         if not username:
             raise ValueError('Users must have a username')
+        if not university:
+            raise ValueError('Users must have a university')
         if not email:
             raise ValueError('Users must have an email')
+        if not password:
+            raise ValueError('Users must have a password')
 
         user = self.model(
             username=username,
@@ -56,14 +61,21 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, password=None):
-        user = self.create_user(
+    def create_superuser(self, username, type=None, university=None, email=None, password=None):
+        if not username:
+            raise ValueError('Users must have a username')
+
+        if not password:
+            raise ValueError('Users must have a password')
+
+        user = self.model(
             username=username,
-            password=password
+            email=email
         )
+        user.set_password(password)
         user.is_admin = True
-        user.is_staff = True
         user.is_superuser = True
+        user.is_staff = True
         user.save(using=self._db)
         return user
 
