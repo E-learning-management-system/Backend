@@ -92,7 +92,13 @@ class ForgotPasswordSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
         attrs['user'] = user
-        return user
+        return attrs
+
+    class Meta:
+        model = User
+        username = serializers.ReadOnlyField(source='user.username')
+        password = serializers.ReadOnlyField(source='user.password')
+        fields = ['id', 'username', 'email', 'password']
 
 
 class CourseSerializer(serializers.ModelSerializer):

@@ -52,7 +52,7 @@ class Signin(generics.GenericAPIView):
 class ForgotPassword(generics.GenericAPIView):
     serializer_class = ForgotPasswordSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -61,6 +61,7 @@ class ForgotPassword(generics.GenericAPIView):
                   data,
                   'no-reply-khu@markop.ir',
                   [user.email])
+        return Response(status=status.HTTP_200_OK)
 
 
 class CourseList(generics.ListAPIView):

@@ -61,7 +61,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email=None, password=None):
+    def create_superuser(self, username, password=None):
         if not username:
             raise ValueError('Users must have a username')
         if not password:
@@ -69,7 +69,6 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             username=username,
-            email=email
         )
         user.set_password(password)
         user.is_admin = True
@@ -81,13 +80,14 @@ class UserManager(BaseUserManager):
 
 class User(PermissionsMixin, AbstractBaseUser):
     VALID_PHOTO_EXTENTION = ['jpg', 'png', 'jpeg']
+
     first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
-    university = models.CharField(verbose_name="دانشگاه", max_length=50)
-    email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100)
+    university = models.CharField(verbose_name="دانشگاه", max_length=50, null=True, blank=True)
+    email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100, null=True, blank=True)
     username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
-    type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES)
+    type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES, null=True, blank=True)
     is_active = models.BooleanField(verbose_name='فعال', default=True)
     is_staff = models.BooleanField(verbose_name='کارمند', default=False)
     is_superuser = models.BooleanField(verbose_name='ابرکاربر', default=False)
@@ -99,7 +99,7 @@ class User(PermissionsMixin, AbstractBaseUser):
                               upload_to=user_photo_directory_path, null=True,
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
-    REQUIRED_FIELDS = ['type', 'university']
+    REQUIRED_FIELDS = []
     USERNAME_FIELD = 'username'
     objects = UserManager()
 
