@@ -103,8 +103,6 @@ class User(PermissionsMixin, AbstractBaseUser):
     USERNAME_FIELD = 'username'
     objects = UserManager()
 
-
-
     def __str__(self):
         if (self.first_name is not None) and (self.last_name is not None):
             return str(self.first_name + ' ' + self.last_name)
@@ -115,6 +113,7 @@ class User(PermissionsMixin, AbstractBaseUser):
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
         ordering = ['username']
+
 
 class Course(models.Model):
     title = models.CharField(verbose_name='عنوان', max_length=255)
@@ -168,7 +167,6 @@ class Post(models.Model):
                             help_text='Image size should be less than {0}'.format(
                                 filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))
                             )
-    saved_by = models.ManyToManyField(User, verbose_name='ذخیره شده توسط', blank=True)
 
     def __str__(self):
         return str(self.postId)
@@ -189,18 +187,6 @@ class PostComment(models.Model):
         ordering = ['-date']
         verbose_name = 'کامنت'
         verbose_name_plural = 'کامنت ها'
-
-
-class PostAnswer(models.Model):
-    teacher = models.ForeignKey(User, verbose_name='استاد', on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, verbose_name='پست', on_delete=models.CASCADE)
-    text = models.TextField(verbose_name='متن')
-    date = models.DateTimeField(verbose_name='ایجاد شده در: ', auto_now_add=True, null=True)
-
-    class Meta:
-        ordering = ['-date']
-        verbose_name = 'پاسخ استاد'
-        verbose_name_plural = 'پاسخ های اساتید'
 
 
 class PostLike(models.Model):

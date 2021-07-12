@@ -147,12 +147,12 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    post = serializers.ReadOnlyField()
-    user = serializers.ReadOnlyField()
+    post_id = serializers.ReadOnlyField(source='post.id')
+    user_username = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = PostComment
-        fields = ['post', 'user', 'text', 'date']
+        fields = ['id', 'post_id', 'user_username', 'text', 'date']
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -161,16 +161,9 @@ class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostLike
-        fields = ['user', 'post_id', 'date']
+        fields = ['id', 'user', 'post_id', 'date']
 
 
-class PostAnswerSerializer(serializers.ModelSerializer):
-    post = serializers.ReadOnlyField
-    teacher = serializers.ReadOnlyField
-
-    class Meta:
-        model = PostAnswer
-        fields = ['post', 'teacher']
 
 
 class SubjectSerializer(serializers.ModelSerializer):

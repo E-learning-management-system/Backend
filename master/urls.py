@@ -16,6 +16,12 @@ urlpatterns = [
     path('post-rud/<int:pk>', ms.PostRUD.as_view()),
     path('posts/<int:pk>/newlike', ms.LikeCreate.as_view()),
     path('posts/<int:pk>/likes', ms.LikeList.as_view()),
+    path('removelike/<int:pk>/', ms.LikeDestroy.as_view()),
+    path('posts/<int:pk>/newcomment', ms.CommentCreate.as_view()),
+    path('posts/<int:pk>/comments', ms.CommentList.as_view()),
+    path('deletecomment/<int:pk>', ms.CommentDelete.as_view()),
+
+
 
     #################################################################
     path('exercises/', ms.ExerciseList.as_view()),
