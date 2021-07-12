@@ -78,7 +78,6 @@ class SigninSerializer(serializers.Serializer):
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
-    password = serializers.CharField(read_only=True)
 
     def check(self, attrs):
         email = attrs.get('email')

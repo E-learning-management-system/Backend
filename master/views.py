@@ -6,7 +6,6 @@ from rest_framework import generics, permissions, status, filters
 
 from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
 from .filters import ExerciseFilter
@@ -65,7 +64,8 @@ class ForgotPassword(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = 'Password : {0}'.format(str(serializer.validated_data['password']))
+        data = 'Username : {0} \nPassword : {1}'.format(str(self.request.user.username),
+                                                        str(self.request.user.password))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
