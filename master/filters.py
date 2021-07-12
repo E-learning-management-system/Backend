@@ -6,4 +6,4 @@ class ExerciseFilter(filters.FilterSet):
 
     class Meta:
         model = Exercise
-        fields = ['status']
+        fields = []

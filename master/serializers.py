@@ -190,9 +190,9 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'author', 'status', 'date', 'deadline', 'tags', 'file', 'course',
+        fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'file', 'course',
                   'subject']
-        read_only_fields = ['id', 'title', 'description', 'author', 'status', 'date', 'deadline', 'tags', 'course',
+        read_only_fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'course',
                             'subject']
 
 

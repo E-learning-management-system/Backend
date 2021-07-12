@@ -17,15 +17,20 @@ class CourseStudentInline(admin.StackedInline):
     model = CourseStudent
 
 
+class PostInline(admin.StackedInline):
+    model = Post
+
+
 class CourseStudentAdmin(admin.ModelAdmin):
     list_display = ['user', 'course']
     list_filter = ['course']
 
 
 class CourseAdmin(admin.ModelAdmin):
-    inlines = [SubjectInline, CourseStudentInline]
+    inlines = [SubjectInline, CourseStudentInline, PostInline]
     list_display = ['title', 'teacher', 'start_date', 'end_date', 'exam_date']
-    list_filter = ['teacher', 'start_date', 'end_date', 'exam_date']
+    list_filter = ['teacher', 'start_date', 'end_date', 'exam_date', 'student']
+    search_fields = ['title', 'description']
 
 
 class UAdmin(admin.ModelAdmin):

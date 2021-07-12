@@ -165,7 +165,7 @@ class Post(models.Model):
                             )
 
     def __str__(self):
-        return str(self.postId)
+        return str(self.id)
 
     class Meta:
         ordering = ['-date']
