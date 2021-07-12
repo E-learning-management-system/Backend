@@ -74,8 +74,8 @@ class ExerciseAnswerAdmin(admin.ModelAdmin):
 
 class ExerciseAdmin(admin.ModelAdmin):
     inlines = [ExerciseAnswerInline]
-    list_display = ('title', 'course', 'subject', 'author', 'status', 'deadline')
-    list_filter = ('author', 'deadline', 'status', 'subject')
+    list_display = ('title', 'course', 'subject', 'author', 'deadline')
+    list_filter = ('author', 'deadline', 'subject')
 
 
 admin.site.register(Subject, SubjectAdmin)

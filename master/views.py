@@ -5,10 +5,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status, filters
 
 from rest_framework.authtoken.models import Token
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
-from .filters import ExerciseFilter
 from .serializers import *
 
 
@@ -357,7 +354,6 @@ class ExerciseListCreate(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['id', 'title']
-    filterset_class = ExerciseFilter
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
@@ -463,6 +459,7 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         serializer.save()
 
+#
 # class ExerciseAnswerList(generics.ListAPIView):
 #     serializer_class = ExerciseAnswerSerializer
 #     permission_classes = [permissions.IsAuthenticated]
@@ -484,8 +481,8 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
 #
 #     def perform_create(self, serializer):
 #         serializer.save(exercise=Exercise.objects.get(pk=self.kwargs['pk']))
-
-
+#
+#
 # class TagCreate(generics.CreateAPIView):
 #     serializer_class = TagSerializer
 #     permission_classes = [permissions.IsAuthenticated]
@@ -496,7 +493,8 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
 #
 #     def perform_create(self, serializer):
 #         serializer.save(exercises=Exercise.objects.get(pk=self.kwargs['pk']))
-
+#
+#
 # class TagList(generics.ListAPIView):
 #     serializer_class = TagSerializer
 #     permission_classes = [permissions.IsAuthenticated]

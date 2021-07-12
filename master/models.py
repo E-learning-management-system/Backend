@@ -208,18 +208,11 @@ class Subject(models.Model):
         verbose_name_plural = 'مباحث'
 
 
-Exercise_Status_choices = [
-    ('e', 'بی پاسخ'),
-    ('a', 'پاسخ داده شده'),
-]
-
-
 class Exercise(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     title = models.CharField(max_length=100, verbose_name='عنوان', unique=True)
     description = models.TextField(max_length=1000)
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
-    status = models.CharField(max_length=30, verbose_name='وضعیت', choices=Exercise_Status_choices, default='e')
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
     tags = models.ManyToManyField('Tag', blank=True)
@@ -245,6 +238,7 @@ class ExerciseAnswer(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)
+    description = models.TextField(max_length=1000)
     date = models.DateTimeField(auto_now_add=True, null=True, verbose_name='تاریخ بارگزاری')
     file = models.FileField(upload_to=exercise_ans_image_directory_path, null=True, blank=True,
                             validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
