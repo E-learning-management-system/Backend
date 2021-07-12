@@ -353,7 +353,6 @@ class CommentDelete(generics.DestroyAPIView):
 class ExerciseList(generics.ListAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -378,7 +377,6 @@ class ExerciseCreate(generics.CreateAPIView):
 class ExerciseListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         return Exercise.objects.filter(author=self.request.user)
@@ -414,7 +412,6 @@ class ExerciseRUD(generics.RetrieveDestroyAPIView):
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -454,7 +451,6 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
 class ExerciseAnswerList(generics.ListAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -490,7 +486,6 @@ class TagCreate(generics.CreateAPIView):
 class TagList(generics.ListAPIView):
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
