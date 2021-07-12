@@ -20,7 +20,7 @@ urlpatterns = [
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
-APP_NAME = 'Piazza'
-admin.site.site_header = 'پنل مدیریت' + APP_NAME
+APP_NAME = 'سورن'
+admin.site.site_header = 'پنل مدیریت ' + APP_NAME
 admin.site.site_title = APP_NAME
 admin.site.index_title = 'صفحه مدیریت'

@@ -31,6 +31,11 @@ class Signup(generics.CreateAPIView):
         user = User.objects.get(type=serializer.validated_data['type'],
                                 university=serializer.validated_data['university'],
                                 email=serializer.validated_data['email'])
+        mail = '{0}'.format(str(serializer.validated_data['email']))
+        send_mail('سورن',
+                  'به سورن خوش آمدید!',
+                  'no-reply-khu@markop.ir',
+                  [mail])
         token, create = Token.objects.get_or_create(user=user)
         data = {'token': token.key}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
@@ -58,7 +63,7 @@ class ForgotPassword(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = 'Password : {0}'.format(str(serializer.validated_data['password']))
         mail = '{0}'.format(str(serializer.validated_data['email']))
-        send_mail('بازیابی کلمه عبور',
+        send_mail('سورن',
                   data,
                   'no-reply-khu@markop.ir',
                   [mail])
