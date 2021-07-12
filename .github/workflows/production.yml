@@ -1,0 +1,21 @@
+name: Django production branch
+
+on:
+  push:
+    branches: [production]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Deploy Project
+        run: docker-compose up -d --force-recreate --build piazza-api
+
+      - name: CleanUp Environment
+        if: ${{ always() }}
+        run: docker system prune -f

@@ -1,5 +1,6 @@
 from pathlib import Path
 import locale
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,11 +8,12 @@ SECRET_KEY = 'django-insecure-j$y3y78*fsu4%!xn!n=@yq7y)qt7g8ar*9nez0s=py&cy(-*cp
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", '').split(
+    " ") if os.environ.get("DJANGO_ALLOWED_HOSTS", '') else []
 
 INSTALLED_APPS = [
     'master',
-
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -20,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-
+    
     # https://drf-spectacular.readthedocs.io/en/latest/readme.html
     'drf_spectacular',
 
@@ -82,10 +84,11 @@ WSGI_APPLICATION = 'piazza.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'piazza_db',
-        'USER': 'piazza',
-        'PASSWORD': 'piazza_1234',
+        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.mysql'),
+        'NAME': os.environ.get('SQL_DATABASE', 'piazza_db'),
+        'USER': os.environ.get('SQL_USER', 'piazza'),
+        'PASSWORD': os.environ.get('SQL_PASSWORD', 'piazza_1234'),
+        'HOST': os.environ.get('SQL_HOST', 'localhost'),
     }
 }
 
