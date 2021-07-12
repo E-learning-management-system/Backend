@@ -22,12 +22,6 @@ urlpatterns = [
     path('deletecomment/<int:pk>', ms.CommentDelete.as_view()),
 
     #################################################################
-    # path('exercises/', ms.ExerciseList.as_view()),
-    # path('newexercise/', ms.ExerciseCreate.as_view()),
-    # path('exercises/<int:pk>/tags', ms.TagList.as_view()),
-    # path('exercises/<int:pk>/newtag', ms.TagCreate.as_view()),
-    # path('exercises/<int:pk>/answers', ms.ExerciseAnswerList.as_view()),
-    # path('exercises/<int:pk>/newanswer', ms.ExerciseAnswerCreate.as_view()),
     path('exercise', ms.ExerciseListCreate.as_view()),
     path('exercise/<int:pk>', ms.ExerciseRUD.as_view()),
     path('exercise/<int:pk>/answer', ms.ExerciseAnswerListCreate),
