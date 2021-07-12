@@ -21,8 +21,6 @@ urlpatterns = [
     path('posts/<int:pk>/comments', ms.CommentList.as_view()),
     path('deletecomment/<int:pk>', ms.CommentDelete.as_view()),
 
-
-
     #################################################################
     path('exercises/', ms.ExerciseList.as_view()),
     path('newexercise/', ms.ExerciseCreate.as_view()),
@@ -33,4 +31,5 @@ urlpatterns = [
     path('exerciseanswer-rud/<int:pk>', ms.ExerciseAnswerRUD.as_view()),
     path('exercises/<int:pk>/tags', ms.TagList.as_view()),
     path('exercises/<int:pk>/newtag', ms.TagCreate.as_view()),
+    path('tag-rud/<int:pk>', ms.TagRUD.as_view()),
 ]

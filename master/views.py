@@ -327,7 +327,6 @@ class CommentList(generics.ListAPIView):
         return PostComment.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
 
 
-
 class CommentDelete(generics.DestroyAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -346,8 +345,6 @@ class CommentDelete(generics.DestroyAPIView):
                 return self.destroy(self, request, *args, **kwargs)
             else:
                 raise ValidationError('Access Denied')
-
-
 
 
 ###########################################################################################
@@ -488,3 +485,17 @@ class TagList(generics.ListAPIView):
             return Exercise.objects.get(pk=self.kwargs['pk'], author=self.request.user).tag_set.all()
         if self.request.user.type == 's':
             return self.request.user.exercise_set.get(pk=self.kwargs['pk']).tag_set.all()
+
+
+class TagRUD(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Tag.objects.all()
+
+    def delete(self, request, *args, **kwargs):
+        tag = Tag.objects.filter(pk=kwargs['pk'])
+        if tag.exists():
+            return self.destroy(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save()
