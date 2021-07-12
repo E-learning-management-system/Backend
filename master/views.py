@@ -320,6 +320,7 @@ class CommentList(generics.ListAPIView):
         return PostComment.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
 
 
+
 class CommentDelete(generics.DestroyAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
