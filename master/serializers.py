@@ -184,7 +184,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ExerciseSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
     course = CourseSerializer(read_only=True)
     subject = SubjectSerializer(read_only=True)
 
