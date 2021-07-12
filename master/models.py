@@ -243,7 +243,6 @@ class Exercise(models.Model):
 
 class ExerciseAnswer(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
-
     exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True, null=True, verbose_name='تاریخ بارگزاری')
@@ -264,6 +263,7 @@ class ExerciseAnswer(models.Model):
 
 
 class Tag(models.Model):
+    exercises = models.ManyToManyField('Exercise')
     title = models.CharField(max_length=600)
     link = models.CharField(max_length=1000)
 

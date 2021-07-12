@@ -1,12 +1,14 @@
-from datetime import datetime
+from django.utils import timezone
 from django.core.mail import send_mail
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, filters
 
 from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from .filters import ExerciseFilter
 from .serializers import *
 
 
@@ -353,7 +355,6 @@ class CommentDelete(generics.DestroyAPIView):
 class ExerciseList(generics.ListAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -371,14 +372,16 @@ class ExerciseCreate(generics.CreateAPIView):
             raise serializers.ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        # todo
-        serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user, date=timezone.now())
 
 
 class ExerciseListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ['id', 'title']
+    filterset_class = ExerciseFilter
+    http_method_names = ['get', 'post']
 
     def get_queryset(self):
         return Exercise.objects.filter(author=self.request.user)
@@ -393,6 +396,7 @@ class ExerciseListCreate(generics.ListCreateAPIView):
 class ExerciseRUD(generics.RetrieveDestroyAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'patch', 'delete']
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -414,7 +418,7 @@ class ExerciseRUD(generics.RetrieveDestroyAPIView):
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
+    http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -433,6 +437,7 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
 class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'patch', 'delete']
     queryset = ExerciseAnswer.objects.all()
 
     def get_queryset(self):
@@ -454,7 +459,6 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
 class ExerciseAnswerList(generics.ListAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -484,13 +488,12 @@ class TagCreate(generics.CreateAPIView):
             raise serializers.ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        serializer.save(exercise=Exercise.objects.get(pk=self.kwargs['pk']))
+        serializer.save(exercises=Exercise.objects.get(pk=self.kwargs['pk']))
 
 
 class TagList(generics.ListAPIView):
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -502,6 +505,7 @@ class TagList(generics.ListAPIView):
 class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'patch', 'delete']
     queryset = Tag.objects.all()
 
     def delete(self, request, *args, **kwargs):
