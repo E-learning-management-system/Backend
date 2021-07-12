@@ -176,9 +176,18 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 ############################################################################################
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'title', 'link']
+        read_only_fields = ['id', 'title', 'link']
+
+
 class ExerciseSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
-    #tags = TagSerializer()
+    tags = TagSerializer(many=True)
+    course = CourseSerializer(read_only=True)
+    subject = SubjectSerializer(read_only=True)
 
     class Meta:
         model = Exercise
@@ -189,6 +198,9 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
 
 class ExerciseAnswerSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    exercise = ExerciseSerializer(read_only=True)
+
     class Meta:
         model = ExerciseAnswer
         fields = ['id', 'user', 'exercise', 'file', 'date']
@@ -198,5 +210,5 @@ class ExerciseAnswerSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'exercises', 'title', 'link']
+        fields = ['id', 'title', 'link']
         read_only_fields = ['id', 'title', 'link']

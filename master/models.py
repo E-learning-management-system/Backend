@@ -263,7 +263,6 @@ class ExerciseAnswer(models.Model):
 
 
 class Tag(models.Model):
-    exercises = models.ManyToManyField('Exercise')
     title = models.CharField(max_length=600)
     link = models.CharField(max_length=1000)
 
