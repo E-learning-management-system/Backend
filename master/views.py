@@ -397,6 +397,7 @@ class ExerciseRUD(generics.RetrieveDestroyAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'patch', 'delete']
+    lookup_field = 'id'
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -439,6 +440,7 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'patch', 'delete']
     queryset = ExerciseAnswer.objects.all()
+    lookup_field = 'id'
 
     def get_queryset(self):
         return ExerciseAnswer.objects.filter(user=self.request.user)
@@ -507,6 +509,7 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'patch', 'delete']
     queryset = Tag.objects.all()
+    lookup_field = 'id'
 
     def delete(self, request, *args, **kwargs):
         tag = Tag.objects.filter(pk=kwargs['pk'])
