@@ -6,6 +6,8 @@ from rest_framework import generics, permissions, status, filters
 
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+
+from .filters import ExerciseFilter
 from .serializers import *
 
 
@@ -355,6 +357,7 @@ class ExerciseListCreate(generics.ListCreateAPIView):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
+    filterset_class = ExerciseFilter
 
     def get_queryset(self):
         pass
