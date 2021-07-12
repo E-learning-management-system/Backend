@@ -24,7 +24,6 @@ urlpatterns = [
     #################################################################
     path('exercises/', ms.ExerciseList.as_view()),
     path('newexercise/', ms.ExerciseCreate.as_view()),
-
     path('exercises-rud/<int:pk>', ms.ExerciseRUD.as_view()),
     path('exercises/<int:pk>/answers', ms.ExerciseAnswerList.as_view()),
     path('exercises/<int:pk>/newanswer', ms.ExerciseAnswerCreate.as_view()),
