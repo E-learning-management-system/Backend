@@ -177,25 +177,23 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 ############################################################################################
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
-    subject = serializers.ReadOnlyField()
-    course = serializers.ReadOnlyField()
-
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'author', 'status', 'date', 'deadline', 'tags', 'file', 'course', 'subject']
+        fields = ['id', 'title', 'description', 'author', 'status', 'date', 'deadline', 'tags', 'file', 'course',
+                  'subject']
+        read_only_fields = ['id', 'title', 'description', 'author', 'status', 'date', 'deadline', 'tags', 'course',
+                            'subject']
 
 
 class ExerciseAnswerSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
-    exercise = serializers.ReadOnlyField()
-
     class Meta:
         model = ExerciseAnswer
         fields = ['id', 'user', 'exercise', 'file', 'date']
+        read_only_fields = ['id', 'user', 'exercise', 'date']
 
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'title', 'link']
+        read_only_fields = ['id', 'title', 'link']

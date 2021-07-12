@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
 
 from rest_framework.authtoken.models import Token
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
 from .serializers import *
@@ -368,17 +369,7 @@ class ExerciseCreate(generics.CreateAPIView):
             raise serializers.ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        """data = JSONParser().parse(self.request)
-        newtitle = data['title']
-        newdescription = data['description']
-        startdate = data['start_date']
-        enddate = data['end_date']
-        examdate = data['exam_date']
-        if startdate > enddate:
-            raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
-        elif examdate < startdate:
-            raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
-        else:"""
+        # todo
         serializer.save(author=self.request.user)
 
 
@@ -404,6 +395,18 @@ class ExerciseRUD(generics.RetrieveDestroyAPIView):
         if self.request.user.type == 't':
             return Exercise.objects.filter(author=self.request.user)
 
+    def delete(self, request, *args, **kwargs):
+        exercise = Exercise.objects.filter(pk=kwargs['pk'], author=self.request.user)
+        if exercise.exists():
+            return self.destroy(request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_update(self, serializer):
+        exercise = Exercise.objects.filter(pk=self.kwargs['pk'], author=self.request.user)
+        if not exercise:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
 
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseAnswerSerializer
@@ -427,6 +430,9 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = ExerciseAnswer.objects.all()
+
+    def get_queryset(self):
+        return ExerciseAnswer.objects.filter(user=self.request.user)
 
     def delete(self, request, *args, **kwargs):
         if self.request.user.type != 't':
