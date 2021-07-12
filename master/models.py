@@ -1,7 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.db import models
-from django.core.validators import MaxValueValidator, FileExtensionValidator, ValidationError
+from django.core.validators import FileExtensionValidator, ValidationError
 from django.conf import settings
 from django.template.defaultfilters import filesizeformat
 
@@ -10,16 +10,16 @@ def user_photo_directory_path(instance, filename):
     return 'user/{0}/photo/{1}'.format(str(instance.user.username), filename)
 
 
-def user_identifier_image_directory_path(instance, filename):
-    return 'user/{0}/identifier-image/{1}'.format(str(instance.user.username), filename)
-
-
 def post_image_directory_path(instance, filename):
     return 'user/{0}/post/{1}'.format(str(instance.poster.username), filename)
 
 
-def user_files_directory_path(instance, filename):
-    return 'user/{0}/files/{1}'.format(str(instance.message.user.username), filename)
+def exercise_image_directory_path(instance, filename):
+    return 'user/{0}/exercise/{1}'.format(str(instance.poster.username), filename)
+
+
+def exercise_ans_image_directory_path(instance, filename):
+    return 'user/{0}/exercise_ans/{1}'.format(str(instance.poster.username), filename)
 
 
 def validate_image_size(image):
@@ -33,10 +33,6 @@ TYPE_CHOICES = [
     ('t', 'استاد'),
     ('s', 'دانشجو')
 ]
-
-
-def user_image_directory_path(instance, filename):
-    return 'user/{0}/image/{1}'.format(instance.photo, filename)
 
 
 class UserManager(BaseUserManager):
@@ -219,6 +215,7 @@ Exercise_Status_choices = [
 
 
 class Exercise(models.Model):
+    VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     title = models.CharField(max_length=100, verbose_name='عنوان', unique=True)
     description = models.TextField(max_length=1000)
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
@@ -228,6 +225,12 @@ class Exercise(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
+    file = models.FileField(upload_to=exercise_image_directory_path, null=True, blank=True,
+                            validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
+                            verbose_name='فایل',
+                            help_text='Image size should be less than {0}'.format(
+                                filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))
+                            )
 
     class Meta:
         ordering = ['-date']
@@ -239,10 +242,17 @@ class Exercise(models.Model):
 
 
 class ExerciseAnswer(models.Model):
+    VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
+
     exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)
-    file = models.FileField(verbose_name='فایل پاسخ', null=True)
     date = models.DateTimeField(auto_now_add=True, null=True, verbose_name='تاریخ بارگزاری')
+    file = models.FileField(upload_to=exercise_ans_image_directory_path, null=True, blank=True,
+                            validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
+                            verbose_name='فایل',
+                            help_text='Image size should be less than {0}'.format(
+                                filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))
+                            )
 
     class Meta:
         ordering = ['-date']

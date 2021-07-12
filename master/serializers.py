@@ -78,9 +78,11 @@ class SigninSerializer(serializers.Serializer):
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
+    password = serializers.CharField(read_only=True)
 
     def check(self, attrs):
         email = attrs.get('email')
+        attrs.get('password')
         if email:
             user = User.objects.filter(email)
             if user.exist():
@@ -162,8 +164,6 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostLike
         fields = ['id', 'user', 'post_id', 'date']
-
-
 
 
 class SubjectSerializer(serializers.ModelSerializer):

@@ -56,10 +56,12 @@ class ForgotPassword(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        data = 'Password : {0}'.format(str(serializer.validated_data['password']))
+        mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('بازیابی کلمه عبور',
-                  'hi',
+                  data,
                   'no-reply-khu@markop.ir',
-                  ['amirvahdati16@gmail.com'])
+                  [mail])
         return Response(status=status.HTTP_200_OK)
 
 
