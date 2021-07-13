@@ -5,10 +5,13 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status, filters
 
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import ExerciseFilter
 from .serializers import *
+
+from .permissions import IsExerciseAuthor
 
 
 class Signup(generics.CreateAPIView):
@@ -359,27 +362,35 @@ class ExerciseListCreate(generics.ListCreateAPIView):
     http_method_names = ['get', 'post']
     filterset_class = ExerciseFilter
 
-    def get_queryset(self):
-        pass
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('فقط اساتید میتوانند تمرین بگذارند')
 
-    def perform_create(self, serializer):
-        pass
+    # def get_queryset(self):
+    #     pass
+    #
+    # def perform_create(self, serializer):
+    #     Exercise.objects.create(self)
 
 
 class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExerciseSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsExerciseAuthor]
     http_method_names = ['get', 'patch', 'delete']
     lookup_field = 'id'
 
-    def get_queryset(self):
-        pass
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('فقط اساتید میتوانند تمرین بگذارند')
 
-    def perform_update(self, serializer):
-        pass
-
-    def perform_destroy(self, instance):
-        pass
+    # def get_queryset(self):
+    #     return Exercise.objects.filter(pk=self.kwargs['pk'])
+    #
+    # def perform_update(self, serializer):
+    #     pass
+    #
+    # def perform_destroy(self, instance):
+    #     pass
 
 
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
@@ -389,11 +400,15 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
 
-    def get_queryset(self):
-        pass
+    def perform_authentication(self, request):
+        if self.request.user.type != 's':
+            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
 
-    def perform_create(self, serializer):
-        pass
+    # def get_queryset(self):
+    #     pass
+    #
+    # def perform_create(self, serializer):
+    #     pass
 
 
 class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
@@ -403,14 +418,18 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExerciseAnswer.objects.all()
     lookup_field = 'id'
 
-    def get_queryset(self):
-        pass
+    def perform_authentication(self, request):
+        if self.request.user.type != 's':
+            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
 
-    def perform_update(self, serializer):
-        pass
-
-    def perform_destroy(self, instance):
-        pass
+    # def get_queryset(self):
+    #     return ExerciseAnswer.objects.filter(pk=self.kwargs['pk'])
+    #
+    # def perform_update(self, serializer):
+    #     pass
+    #
+    # def perform_destroy(self, instance):
+    #     pass
 
 
 class TagListCreate(generics.ListCreateAPIView):
@@ -420,11 +439,11 @@ class TagListCreate(generics.ListCreateAPIView):
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
 
-    def get_queryset(self):
-        pass
-
-    def perform_create(self, serializer):
-        pass
+    # def get_queryset(self):
+    #     pass
+    #
+    # def perform_create(self, serializer):
+    #     pass
 
 
 class TagRUD(generics.RetrieveUpdateDestroyAPIView):
@@ -434,11 +453,11 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tag.objects.all()
     lookup_field = 'id'
 
-    def get_queryset(self):
-        pass
+    # def get_queryset(self):
+    #     return Tag.objects.filter(pk=self.kwargs['pk'])
 
-    def perform_update(self, serializer):
-        pass
-
-    def perform_destroy(self, instance):
-        pass
+    # def perform_update(self, serializer):
+    #     pass
+    #
+    # def perform_destroy(self, instance):
+    #     pass
