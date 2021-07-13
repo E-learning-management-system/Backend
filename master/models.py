@@ -7,7 +7,7 @@ from django.template.defaultfilters import filesizeformat
 
 
 def user_photo_directory_path(instance, filename):
-    return 'user/{0}/photo/{1}'.format(str(instance.user.username), filename)
+    return 'user/{0}/photo/{1}'.format(str(instance.username), filename)
 
 
 def post_image_directory_path(instance, filename):
@@ -15,11 +15,11 @@ def post_image_directory_path(instance, filename):
 
 
 def exercise_image_directory_path(instance, filename):
-    return 'user/{0}/exercise/{1}'.format(str(instance.poster.username), filename)
+    return 'user/{0}/exercise/{1}'.format(str(instance.author.username), filename)
 
 
 def exercise_ans_image_directory_path(instance, filename):
-    return 'user/{0}/exercise_ans/{1}'.format(str(instance.poster.username), filename)
+    return 'user/{0}/exercise_ans/{1}'.format(str(instance.user.username), filename)
 
 
 def validate_image_size(image):
@@ -165,7 +165,7 @@ class Post(models.Model):
                             )
 
     def __str__(self):
-        return str(self.postId)
+        return str(self.id)
 
     class Meta:
         ordering = ['-date']
