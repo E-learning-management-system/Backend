@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from . import settings
+from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 from master import views as ms
@@ -12,13 +14,14 @@ urlpatterns = [
     path('signin/forgotpassword/', ms.ForgotPassword.as_view(), name='forgot_password'),
     path('profile/', ms.profile.as_view(), name='profile'),
 
+
     path('admin/', admin.site.urls),
     # documentations
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 APP_NAME = 'سورن'
 admin.site.site_header = 'پنل مدیریت ' + APP_NAME
