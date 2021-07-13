@@ -22,26 +22,29 @@ class PostInline(admin.StackedInline):
 
 
 class CourseStudentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'course']
+    list_display = ['id', 'user', 'course']
     list_filter = ['course']
 
 
 class CourseAdmin(admin.ModelAdmin):
+    ordering = ['start_date']
     inlines = [SubjectInline, CourseStudentInline, PostInline]
-    list_display = ['title', 'teacher', 'start_date', 'end_date', 'exam_date']
+    list_display = ['id', 'title', 'teacher', 'start_date', 'end_date', 'exam_date']
     list_filter = ['teacher', 'start_date', 'end_date', 'exam_date', 'student']
     search_fields = ['title', 'description']
 
 
 class UAdmin(admin.ModelAdmin):
     list_display = ['username', 'first_name', 'last_name', 'type', 'university', 'photo', 'date_joined']
-    list_filter = ['username', 'first_name', 'last_name', 'type', 'university', 'photo', 'date_joined']
+    list_filter = ['type', 'university', 'date_joined']
+    search_fields = ['username']
     inlines = [CourseStudentInline]
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'course']
-    list_filter = ['title', 'course']
+    list_display = ['id', 'title', 'course']
+    list_filter = ['course']
+    search_fields = ['title']
     inlines = [ExerciseInline]
 
 
@@ -54,7 +57,7 @@ class CommentInline(admin.StackedInline):
 
 
 class LikeAdmin(admin.ModelAdmin):
-    list_display = ['user', 'post', 'date']
+    list_display = ['id', 'user', 'post', 'date']
     list_filter = ['user', 'post', 'date']
 
 
@@ -65,8 +68,9 @@ class CommentAdmin(admin.ModelAdmin):
 
 class PostAdmin(admin.ModelAdmin):
     inlines = [CommentInline, LikeInline]
-    list_filter = ['poster', 'id', 'date']
+    list_filter = ['poster', 'date']
     list_display = ['id', 'poster', 'file', 'date']
+    search_fields = ['id']
 
 
 class ExerciseAnswerInline(admin.StackedInline):
