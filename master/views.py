@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status, filters
@@ -12,9 +13,6 @@ from .filters import ExerciseFilter
 from .serializers import *
 
 from .permissions import IsExerciseAuthor, IsExerciseAnswerer
-
-
-# ,IsExerciseAnswerer
 
 
 class Signup(generics.CreateAPIView):
@@ -69,8 +67,11 @@ class ForgotPassword(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        new_password = get_random_string(length=8)
+        self.request.user.set_password(new_password)
+        self.request.user.save()
         data = 'Username : {0} \nPassword : {1}'.format(str(self.request.user.username),
-                                                        str(self.request.user.password))
+                                                        str(new_password))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
