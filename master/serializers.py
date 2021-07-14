@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from .models import *
 
@@ -90,8 +91,8 @@ class ForgotPasswordSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
-        attrs['user'] = user
-        return user
+        attrs['email'] = email
+        return attrs
 
 
 class CourseSerializer(serializers.ModelSerializer):
