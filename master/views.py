@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from .filters import ExerciseFilter
 from .serializers import *
 
-from .permissions import IsExerciseAuthor
+from .permissions import IsExerciseAuthor, IsExerciseAnswerer
 
 
 # ,IsExerciseAnswerer
@@ -365,9 +365,9 @@ class ExerciseListCreate(generics.ListCreateAPIView):
         if self.request.user.type != 't':
             raise ValidationError('فقط اساتید میتوانند تمرین بگذارند')
 
-    # def get_queryset(self):
-    #     pass
-    #
+    def get_queryset(self):
+        return Exercise.objects.all()
+
     def perform_create(self, serializer):
         Exercise.objects.create(author=self.request.user)
 
@@ -383,8 +383,8 @@ class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.type != 't':
             raise ValidationError('فقط اساتید میتوانند تمرین بگذارند')
 
-    # def get_queryset(self):
-    #     return Exercise.objects.filter(pk=self.kwargs['pk'])
+    def get_queryset(self):
+        return Exercise.objects.filter(id=self.kwargs['id'])
     # #
     # def perform_update(self, serializer):
     #     pass
@@ -397,6 +397,7 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseAnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
+    queryset = ExerciseAnswer.objects.all()
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
 
@@ -414,7 +415,7 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
 
 class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExerciseAnswerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsExerciseAnswerer]
     http_method_names = ['get', 'patch', 'delete']
     queryset = ExerciseAnswer.objects.all()
     lookup_field = 'id'

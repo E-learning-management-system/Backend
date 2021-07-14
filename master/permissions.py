@@ -6,11 +6,12 @@ class IsExerciseAuthor(permissions.BasePermission):
     status_code = status.HTTP_403_FORBIDDEN
 
     def has_object_permission(self, request, view, obj):
-        return obj.author == request.user
+        return obj.author.id == request.user.id
 
-# class IsExerciseAnswerer(permissions.BasePermission):
-#     message = 'این تمرین برای شما نیست'
-#     status_code = status.HTTP_403_FORBIDDEN
-#
-#     # def has_object_permission(self, request, view, obj):
-#     #     return obj.
+
+class IsExerciseAnswerer(permissions.BasePermission):
+    message = 'این جواب تمرین را شما نداده اید'
+    status_code = status.HTTP_403_FORBIDDEN
+
+    def has_object_permission(self, request, view, obj):
+        return obj.user.id == request.user.id
