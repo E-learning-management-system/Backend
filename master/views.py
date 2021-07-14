@@ -67,11 +67,8 @@ class ForgotPassword(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        new_password = get_random_string(length=8)
-        self.request.user.set_password(new_password)
-        self.request.user.save()
         data = 'Username : {0} \nPassword : {1}'.format(str(self.request.user.username),
-                                                        str(new_password))
+                                                        str(self.request.user.password))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
