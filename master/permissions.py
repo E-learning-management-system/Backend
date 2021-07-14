@@ -7,3 +7,10 @@ class IsExerciseAuthor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.author == request.user
+
+# class IsExerciseAnswerer(permissions.BasePermission):
+#     message = 'این تمرین برای شما نیست'
+#     status_code = status.HTTP_403_FORBIDDEN
+#
+#     # def has_object_permission(self, request, view, obj):
+#     #     return obj.

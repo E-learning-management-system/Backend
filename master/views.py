@@ -14,6 +14,9 @@ from .serializers import *
 from .permissions import IsExerciseAuthor
 
 
+# ,IsExerciseAnswerer
+
+
 class Signup(generics.CreateAPIView):
     serializer_class = SignupSerializer
     permission_classes = [permissions.AllowAny]
@@ -225,8 +228,6 @@ class SubjectRUD(generics.RetrieveDestroyAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
-
-
 class PostList(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -368,7 +369,7 @@ class ExerciseListCreate(generics.ListCreateAPIView):
     #     pass
     #
     # def perform_create(self, serializer):
-    #     Exercise.objects.create(self)
+    #     Exercise.objects.create(author=self.request.user)
 
 
 class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
@@ -383,7 +384,7 @@ class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
 
     # def get_queryset(self):
     #     return Exercise.objects.filter(pk=self.kwargs['pk'])
-    #
+    # #
     # def perform_update(self, serializer):
     #     pass
     #
@@ -405,8 +406,9 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     # def get_queryset(self):
     #     pass
     #
+
     # def perform_create(self, serializer):
-    #     pass
+    #     ExerciseAnswer.objects.create(user=self.request.user)
 
 
 class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
@@ -422,7 +424,7 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
 
     # def get_queryset(self):
     #     return ExerciseAnswer.objects.filter(pk=self.kwargs['pk'])
-    #
+    # #
     # def perform_update(self, serializer):
     #     pass
     #
@@ -430,23 +432,25 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
     #     pass
 
 
-class TagListCreate(generics.ListCreateAPIView):
+class ExerciseTagListCreate(generics.ListCreateAPIView):
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated,
+                          # IsExerciseAnswerer
+                          ]
     filter_backends = [filters.SearchFilter]
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
 
     # def get_queryset(self):
-    #     pass
-    #
+    #     Tag.objects.all()
+
     # def perform_create(self, serializer):
     #     pass
 
 
 class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'patch', 'delete']
     queryset = Tag.objects.all()
     lookup_field = 'id'
@@ -459,3 +463,13 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     #
     # def perform_destroy(self, instance):
     #     pass
+
+
+class TagListCreate(generics.ListCreateAPIView):
+    serializer_class = TagSerializer
+    http_method_names = ['get', 'post']
+    queryset = Tag.objects.all()
+    lookup_field = 'id'
+
+    # def get_queryset(self):
+    #     Tag.objects.all()
