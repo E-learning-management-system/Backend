@@ -115,12 +115,12 @@ class CourseStudentSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
     course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
-    user = serializers.ReadOnlyField(source='user.username')
+    username = serializers.ReadOnlyField(source='user.username')
     user_id = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = CourseStudent
-        fields = ['id', 'user', 'user_id', 'course_id', 'course_title', 'course_teacher']
+        fields = ['id', 'username', 'user_id', 'course_id', 'course_title', 'course_teacher']
 
 
 class PostSerializer(serializers.ModelSerializer):

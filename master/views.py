@@ -214,7 +214,7 @@ class SubjectList(generics.ListAPIView):
             return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
 
 
-class SubjectRUD(generics.RetrieveDestroyAPIView):
+class SubjectRD(generics.RetrieveDestroyAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Subject.objects.all()
@@ -240,7 +240,7 @@ class PostList(generics.ListAPIView):
             return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
 
 
-class PostRUD(generics.RetrieveDestroyAPIView):
+class PostRD(generics.RetrieveDestroyAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
@@ -309,20 +309,27 @@ class LikeDestroy(generics.DestroyAPIView):
         if like:
             return self.destroy(self, request, *args, **kwargs)
         else:
-            raise ValidationError('Access Denied')
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
 class CommentCreate(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_authentication(self, request):
-        if self.request.user.type != 's':
-            raise ValidationError('فقط دانشجویان میتوانند کامنت بگذارند')
-
     def perform_create(self, serializer):
-        if self.request.user.type == 's':
-            serializer.save(post=Post.objects.get(pk=self.kwargs['pk']), user=self.request.user)
+        if self.request.user.type == 't':
+            post = Post.objects.get(pk=self.kwargs['pk'], course__teacher=self.request.user)
+            if post:
+                serializer.save(post=post, user=self.request.user)
+            else:
+                raise ValidationError('شما به این عمل دسترسی ندارید')
+        elif self.request.user.type == 's':
+            post = Post.objects.get(pk=self.kwargs['pk']).course.coursestudent_set.get(user=self.request.user)
+            if post:
+                serializer.save(post=post, user=self.request.user)
+
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
 class CommentList(generics.ListAPIView):
@@ -351,6 +358,9 @@ class CommentDelete(generics.DestroyAPIView):
                 return self.destroy(self, request, *args, **kwargs)
             else:
                 raise ValidationError('Access Denied')
+
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
 ###########################################################################################
