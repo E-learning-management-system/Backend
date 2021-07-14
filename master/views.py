@@ -210,7 +210,7 @@ class SubjectList(generics.ListAPIView):
             return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
 
 
-class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
+class SubjectRUD(generics.RetrieveDestroyAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Subject.objects.all()
@@ -224,9 +224,7 @@ class SubjectRUD(generics.RetrieveUpdateDestroyAPIView):
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
-    def perform_update(self, serializer):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+
 
 
 class PostList(generics.ListAPIView):
@@ -240,7 +238,7 @@ class PostList(generics.ListAPIView):
             return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
 
 
-class PostRUD(generics.RetrieveUpdateDestroyAPIView):
+class PostRUD(generics.RetrieveDestroyAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Post.objects.all()
