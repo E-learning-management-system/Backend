@@ -368,14 +368,15 @@ class ExerciseListCreate(generics.ListCreateAPIView):
     # def get_queryset(self):
     #     pass
     #
-    # def perform_create(self, serializer):
-    #     Exercise.objects.create(author=self.request.user)
+    def perform_create(self, serializer):
+        Exercise.objects.create(author=self.request.user)
 
 
 class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [IsAuthenticated, IsExerciseAuthor]
     http_method_names = ['get', 'patch', 'delete']
+    queryset = Exercise.objects.all()
     lookup_field = 'id'
 
     def perform_authentication(self, request):
@@ -407,8 +408,8 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     #     pass
     #
 
-    # def perform_create(self, serializer):
-    #     ExerciseAnswer.objects.create(user=self.request.user)
+    def perform_create(self, serializer):
+        ExerciseAnswer.objects.create(user=self.request.user)
 
 
 class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
