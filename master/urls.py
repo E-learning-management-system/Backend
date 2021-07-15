@@ -23,10 +23,10 @@ urlpatterns = [
 
     #################################################################
     path('exercise', ms.ExerciseListCreate.as_view()),
-    path('exercise/<int:pk>', ms.ExerciseRUD.as_view()),
-    path('exercise/<int:pk>/answer', ms.ExerciseAnswerListCreate),
-    path('exercise/<int:pk>/tag', ms.ExerciseTagListCreate.as_view()),
+    path('exercise/<int:id>', ms.ExerciseRUD.as_view()),
+    path('exercise/<int:id>/answer', ms.ExerciseAnswerListCreate),
+    path('exercise/<int:id>/tag', ms.ExerciseTagListCreate.as_view()),
     path('tag', ms.TagListCreate.as_view()),
-    path('answer/<int:pk>', ms.ExerciseAnswerRUD.as_view()),
+    path('answer/<int:id>', ms.ExerciseAnswerRUD.as_view()),
     path('tag/<int:id>', ms.TagRUD.as_view()),
 ]
