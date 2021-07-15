@@ -84,10 +84,10 @@ class User(PermissionsMixin, AbstractBaseUser):
     username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
     type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES, null=True, blank=True)
-    is_active = models.BooleanField(verbose_name='فعال', default=True)
     is_staff = models.BooleanField(verbose_name='کارمند', default=False)
     is_superuser = models.BooleanField(verbose_name='ابرکاربر', default=False)
     phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
+    code = models.IntegerField(verbose_name="کد یکبار مصرف", null=True, blank=True)
     state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
     city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
     photo = models.ImageField(verbose_name="تصویر پروفایل",

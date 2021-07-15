@@ -12,8 +12,8 @@ urlpatterns = [
     path('signup/', ms.Signup.as_view(), name='signup'),
     path('signin/', ms.Signin.as_view(), name='signin'),
     path('signin/forgotpassword/', ms.ForgotPassword.as_view(), name='forgot_password'),
+    path('signin/forgotpassword/verification/', ms.Verification.as_view(), name='verification'),
     path('profile/', ms.profile.as_view(), name='profile'),
-
 
     path('admin/', admin.site.urls),
     # documentations

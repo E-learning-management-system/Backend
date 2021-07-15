@@ -79,19 +79,39 @@ class SigninSerializer(serializers.Serializer):
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
 
-    def check(self, attrs):
+    def validate(self, attrs):
         email = attrs.get('email')
         if email:
-            user = User.objects.filter(email)
-            if user.exist():
+            user = User.objects.filter(email=email)
+            if user:
                 user = user.first()
             if not user:
                 raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
         else:
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
-        attrs['user'] = user
-        return user
+        attrs['email'] = user.email
+        return attrs
+
+
+class Verification(serializers.Serializer):
+    email = serializers.ReadOnlyField()
+    code = serializers.CharField(label='کد یکبار مصرف', max_length=6, write_only=True)
+    token = serializers.CharField(label='توکن', read_only=True)
+
+    def validate(self, attrs):
+        code = attrs.get('code')
+        if code:
+            user = User.objects.filter(code=code)
+            if user:
+                user = user.first()
+            if not user:
+                raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
+        else:
+            raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
+
+        attrs['code'] = code
+        return attrs
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -115,12 +135,12 @@ class CourseStudentSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
     course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
-    user = serializers.ReadOnlyField(source='user.username')
+    username = serializers.ReadOnlyField(source='user.username')
     user_id = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = CourseStudent
-        fields = ['id', 'user', 'user_id', 'course_id', 'course_title', 'course_teacher']
+        fields = ['id', 'username', 'user_id', 'course_id', 'course_title', 'course_teacher']
 
 
 class PostSerializer(serializers.ModelSerializer):
