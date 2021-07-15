@@ -124,6 +124,10 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Course.objects.all()
 
+    def perform_authentication(self, request):
+        if (self.request.user.type == 's') and (self.request.method == 'PUT'):
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
     def delete(self, request, *args, **kwargs):
         course = Course.objects.filter(teacher=self.request.user, pk=self.kwargs['pk'])
         if self.request.user.type == 't':
@@ -133,8 +137,6 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
                 raise ValidationError('شما به این عمل دسترسی ندارید')
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
-
-
 
 
 class CourseStudentList(generics.ListAPIView):
@@ -160,7 +162,11 @@ class CourseStudentCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         course = Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
         if course:
-            serializer.save(course=course)
+            user = User.objects.get(username=self.kwargs['username'], type='s')
+            if user:
+                serializer.save(course=course, user=User.objects.get(username=self.kwargs['username']))
+            else:
+                raise ValidationError('دانشجویی با این نام کاربری موجود نیست')
         else:
             raise ValidationError('Access Denied')
 
@@ -247,10 +253,7 @@ class PostRD(generics.RetrieveDestroyAPIView):
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
-    def perform_update(self, serializer):
-        post = Post.objects.filter(pk=self.kwargs['pk'], poster=self.request.user)
-        if not post:
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+
 
 
 class PostCreate(generics.CreateAPIView):
@@ -262,7 +265,7 @@ class PostCreate(generics.CreateAPIView):
             if Course.objects.get(pk=self.kwargs['pk']).teacher != self.request.user:
                 raise ValidationError('شما به این عمل دسترسی ندارید')
         elif self.request.user.type == 's':
-            user = self.request.user.course_set.filter(pk=self.kwargs['pk'])
+            user = self.request.user.course_set.get(pk=self.kwargs['pk'])
             if not user:
                 raise ValidationError('شما به این عمل دسترسی ندارید')
 
@@ -322,7 +325,8 @@ class CommentCreate(generics.CreateAPIView):
             post = Post.objects.get(pk=self.kwargs['pk']).course.coursestudent_set.get(user=self.request.user)
             if post:
                 serializer.save(post=post, user=self.request.user)
-
+            else:
+                raise ValidationError('شما به این عمل دسترسی ندارید')
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
