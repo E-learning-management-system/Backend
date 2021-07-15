@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django_filters.rest_framework import DjangoFilterBackend
@@ -60,21 +59,41 @@ class Signin(generics.GenericAPIView):
         return Response(data)
 
 
-class ForgotPassword(generics.GenericAPIView):
+class ForgotPassword(generics.CreateAPIView):
     serializer_class = ForgotPasswordSerializer
     permissions = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = 'Username : {0} \nPassword : {1}'.format(str(self.request.user.username),
-                                                        str(self.request.user.password))
+        user = User.objects.filter(email=serializer.validated_data['email'])
+        code = get_random_string(length=6, allowed_chars='1234567890')
+        if user:
+            user = user.first()
+            user.code = code
+            user.save()
+        data = 'رمز یکبار مصرف : {0}'.format(str(code))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
                   'no-reply-khu@markop.ir',
                   [mail])
-        return Response(status=status.HTTP_200_OK)
+        email = serializer.validated_data['email']
+        return Response(email)
+
+
+class Verification(generics.GenericAPIView):
+    serializer_class = Verification
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(code=serializer.validated_data['code'])
+        if user:
+            user = user.first()
+        token, create = Token.objects.get_or_create(user=user)
+        data = {'token': token.key}
+        return Response(data)
 
 
 class profile(generics.RetrieveUpdateAPIView):
@@ -252,8 +271,6 @@ class PostRD(generics.RetrieveDestroyAPIView):
             return self.destroy(request, *args, **kwargs)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
-
-
 
 
 class PostCreate(generics.CreateAPIView):

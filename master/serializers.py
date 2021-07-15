@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate
-from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from .models import *
 
@@ -80,18 +79,38 @@ class SigninSerializer(serializers.Serializer):
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
 
-    def check(self, attrs):
+    def validate(self, attrs):
         email = attrs.get('email')
         if email:
-            user = User.objects.filter(email)
-            if user.exist():
+            user = User.objects.filter(email=email)
+            if user:
                 user = user.first()
             if not user:
                 raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
         else:
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
 
-        attrs['email'] = email
+        attrs['email'] = user.email
+        return attrs
+
+
+class Verification(serializers.Serializer):
+    email = serializers.ReadOnlyField()
+    code = serializers.CharField(label='کد یکبار مصرف', max_length=6, write_only=True)
+    token = serializers.CharField(label='توکن', read_only=True)
+
+    def validate(self, attrs):
+        code = attrs.get('code')
+        if code:
+            user = User.objects.filter(code=code)
+            if user:
+                user = user.first()
+            if not user:
+                raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
+        else:
+            raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
+
+        attrs['code'] = code
         return attrs
 
 
