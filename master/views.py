@@ -135,8 +135,6 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
-
-
 class CourseStudentList(generics.ListAPIView):
     serializer_class = CourseStudentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -413,7 +411,6 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
 
     # def get_queryset(self):
     #     pass
-    #
 
     def perform_create(self, serializer):
         ExerciseAnswer.objects.create(user=self.request.user)
@@ -430,8 +427,8 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.type != 's':
             raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
 
-    # def get_queryset(self):
-    #     return ExerciseAnswer.objects.filter(pk=self.kwargs['pk'])
+    def get_queryset(self):
+        return ExerciseAnswer.objects.filter(id=self.kwargs['id'])
     # #
     # def perform_update(self, serializer):
     #     pass
@@ -442,18 +439,18 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
 
 class ExerciseTagListCreate(generics.ListCreateAPIView):
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAuthenticated,
-                          # IsExerciseAnswerer
-                          ]
+    permission_classes = [permissions.IsAuthenticated, IsExerciseAnswerer]
     filter_backends = [filters.SearchFilter]
     search_fields = ['id', 'title']
     http_method_names = ['get', 'post']
 
-    # def get_queryset(self):
-    #     Tag.objects.all()
+    def get_queryset(self):
+        exercise = Exercise.objects.get(id=self.kwargs['id'])
+        return Tag.objects.filter(exercise=exercise)
 
-    # def perform_create(self, serializer):
-    #     pass
+    def perform_create(self, serializer):
+        exercise = Exercise.objects.get(id=self.kwargs['id'])
+        serializer.save(exercise=exercise)
 
 
 class TagRUD(generics.RetrieveUpdateDestroyAPIView):
@@ -466,8 +463,11 @@ class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     # def get_queryset(self):
     #     return Tag.objects.filter(pk=self.kwargs['pk'])
 
-    # def perform_update(self, serializer):
-    #     pass
+    def perform_update(self, serializer):
+        if self.request.data['title']:
+            serializer.save(title=self.request.data['title'])
+        if self.request.data['link']:
+            serializer.save(link=self.request.data['link'])
     #
     # def perform_destroy(self, instance):
     #     pass
