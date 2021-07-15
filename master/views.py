@@ -134,9 +134,7 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
-    def perform_update(self, serializer):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+
 
 
 class CourseStudentList(generics.ListAPIView):
