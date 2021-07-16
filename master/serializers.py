@@ -113,6 +113,9 @@ class Verification(serializers.Serializer):
     code = serializers.CharField(label='کد یکبار مصرف', max_length=6, write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 
+    class Meta:
+        model = User
+
     def validate(self, attrs):
         code = attrs.get('code')
         if code:
