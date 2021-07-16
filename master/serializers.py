@@ -4,13 +4,21 @@ from .models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
-    date_joined = serializers.ReadOnlyField()
-    email = serializers.ReadOnlyField()
+    date_joined = serializers.ReadOnlyField(label='تاریخ عضویت')
+    email = serializers.ReadOnlyField(label='ایمیل')
+    password = serializers.CharField(label='رمز عبور', min_length=4, required=False,
+                                     help_text='رمز عبور باید حداقل 4 رقمی باشد')
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password', 'university', 'type', 'first_name', 'last_name',
                   'phone', 'state', 'city', 'photo', 'date_joined']
+
+    def update(self, instance, validated_data):
+        instance.password = validated_data.get('password', instance.password)
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
 
 
 TYPE_CHOICES = [
@@ -37,8 +45,14 @@ class SignupSerializer(serializers.Serializer):
         if type and university and email and username and password:
             user = authenticate(request=self.context.get('request'), type=type, university=university, email=email,
                                 username=username, password=password)
+            user1 = User.objects.filter(email=email)
+            user2 = User.objects.filter(username=username)
             if user:
                 raise serializers.ValidationError('کاربر موجود است!', code='conflict')
+            if user1:
+                raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
+            if user2:
+                raise serializers.ValidationError('این نام کاربری موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
 
