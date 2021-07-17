@@ -130,6 +130,9 @@ class Verification(serializers.Serializer):
         attrs['code'] = code
         return attrs
 
+    class Meta:
+        model = User
+
 
 class CourseSerializer(serializers.ModelSerializer):
     teacher = serializers.ReadOnlyField(source='teacher.username')
@@ -211,25 +214,20 @@ class SubjectSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'course_name', 'course_id', 'teacher']
 
 
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'title', 'link']
-        read_only_fields = ['id', 'title', 'link']
+
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    course = CourseSerializer(read_only=True)
-    subject = SubjectSerializer(read_only=True)
+    author = serializers.ReadOnlyField(source='author.username')
+    course_id = serializers.ReadOnlyField(source='course.id')
+    course_title = serializers.ReadOnlyField(source='course.title')
+    subject_id = serializers.ReadOnlyField(source='subject.id')
+    subject_title = serializers.ReadOnlyField(source='subject.id')
 
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'file', 'course',
-                  'subject']
-        read_only_fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'course',
-                            'subject']
+        fields = ['id', 'title', 'description', 'author', 'course_id', 'course_title', 'subject_id', 'subject_title',
+                  'date', 'deadline', 'file']
 
 
 class ExerciseAnswerSerializer(serializers.ModelSerializer):

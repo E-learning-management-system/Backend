@@ -1,8 +1,8 @@
 from django.contrib import admin
-from master.models import Course, CourseStudent, Exercise, ExerciseAnswer, Tag, User, Post, PostComment, PostLike, \
+from master.models import Course, CourseStudent, Exercise, ExerciseAnswer, User, Post, PostComment, PostLike, \
     Subject
 
-admin.site.register(Tag)
+
 
 
 class ExerciseInline(admin.StackedInline):

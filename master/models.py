@@ -215,7 +215,6 @@ class Exercise(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
-    tags = models.ManyToManyField('Tag', blank=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
     file = models.FileField(upload_to=exercise_image_directory_path, null=True, blank=True,
@@ -256,13 +255,4 @@ class ExerciseAnswer(models.Model):
         return '{0} on {1}'.format(self.user, self.date)
 
 
-class Tag(models.Model):
-    title = models.CharField(max_length=600)
-    link = models.CharField(max_length=1000)
 
-    def __str__(self):
-        return str(self.title)
-
-    class Meta:
-        verbose_name = 'تگ'
-        verbose_name_plural = 'تگ ها'

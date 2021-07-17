@@ -13,6 +13,9 @@ urlpatterns = [
     path('subject-rd/<int:pk>/', ms.SubjectRD.as_view()),
     path('courses/<int:pk>/newpost/', ms.PostCreate.as_view()),
     path('courses/<int:pk>/posts/', ms.PostList.as_view()),
+    path('courses/<int:pk>/exercises/', ms.ExerciseList.as_view()),
+    path('subjects/<int:pk>/newexercise', ms.ExerciseCreate.as_view()),
+    path('exercise-rd/<int:pk>', ms.ExerciseRD.as_view()),
     path('post-rd/<int:pk>', ms.PostRD.as_view()),
     path('posts/<int:pk>/newlike', ms.LikeCreate.as_view()),
     path('posts/<int:pk>/likes', ms.LikeList.as_view()),
@@ -20,11 +23,8 @@ urlpatterns = [
     path('posts/<int:pk>/newcomment', ms.CommentCreate.as_view()),
     path('posts/<int:pk>/comments', ms.CommentList.as_view()),
     path('deletecomment/<int:pk>', ms.CommentDelete.as_view()),
-    path('exercise', ms.ExerciseListCreate.as_view()),
-    path('exercise/<int:id>', ms.ExerciseRUD.as_view()),
-    path('exercise/<int:id>/answer', ms.ExerciseAnswerListCreate.as_view()),
-    path('exercise/<int:id>/tag', ms.ExerciseTagListCreate.as_view()),
-    path('tag', ms.TagListCreate.as_view()),
+
+
     path('answer/<int:id>', ms.ExerciseAnswerRUD.as_view()),
-    path('tag/<int:id>', ms.TagRUD.as_view()),
+
 ]
