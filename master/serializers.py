@@ -211,7 +211,6 @@ class SubjectSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'course_name', 'course_id', 'teacher']
 
 
-############################################################################################
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -220,10 +219,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    course = CourseSerializer(read_only=True)
-    subject = SubjectSerializer(read_only=True)
+    # author = UserSerializer(read_only=True)
+    # tags = TagSerializer(many=True, read_only=True)
+    # course = CourseSerializer(read_only=True)
+    # subject = SubjectSerializer(read_only=True)
 
     class Meta:
         model = Exercise
@@ -234,8 +233,8 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
 
 class ExerciseAnswerSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    exercise = ExerciseSerializer(read_only=True)
+    # user = UserSerializer(read_only=True)
+    # exercise = ExerciseSerializer(read_only=True)
 
     class Meta:
         model = ExerciseAnswer
