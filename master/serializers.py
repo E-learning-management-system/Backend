@@ -211,7 +211,6 @@ class SubjectSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'course_name', 'course_id', 'teacher']
 
 
-############################################################################################
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag

@@ -3,7 +3,6 @@ from master.models import Exercise
 
 
 class ExerciseFilter(filters.FilterSet):
-
     class Meta:
         model = Exercise
-        fields = []
+        fields = ['course']

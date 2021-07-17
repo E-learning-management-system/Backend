@@ -379,7 +379,6 @@ class CommentDelete(generics.DestroyAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
-###########################################################################################
 class ExerciseListCreate(generics.ListCreateAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -412,12 +411,6 @@ class ExerciseRUD(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Exercise.objects.filter(id=self.kwargs['id'])
-    # #
-    # def perform_update(self, serializer):
-    #     pass
-    #
-    # def perform_destroy(self, instance):
-    #     pass
 
 
 class ExerciseAnswerListCreate(generics.ListCreateAPIView):
@@ -431,9 +424,6 @@ class ExerciseAnswerListCreate(generics.ListCreateAPIView):
     def perform_authentication(self, request):
         if self.request.user.type != 's':
             raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
-
-    # def get_queryset(self):
-    #     pass
 
     def perform_create(self, serializer):
         ExerciseAnswer.objects.create(user=self.request.user)
@@ -452,12 +442,6 @@ class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return ExerciseAnswer.objects.filter(id=self.kwargs['id'])
-    # #
-    # def perform_update(self, serializer):
-    #     pass
-    #
-    # def perform_destroy(self, instance):
-    #     pass
 
 
 class ExerciseTagListCreate(generics.ListCreateAPIView):
@@ -478,22 +462,17 @@ class ExerciseTagListCreate(generics.ListCreateAPIView):
 
 class TagRUD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TagSerializer
-    # permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'patch', 'delete']
-    queryset = Tag.objects.all()
     lookup_field = 'id'
 
-    # def get_queryset(self):
-    #     return Tag.objects.filter(pk=self.kwargs['pk'])
+    def get_queryset(self):
+        Tag.objects.filter(id=self.kwargs['id'])
 
     def perform_update(self, serializer):
         if self.request.data['title']:
             serializer.save(title=self.request.data['title'])
         if self.request.data['link']:
             serializer.save(link=self.request.data['link'])
-    #
-    # def perform_destroy(self, instance):
-    #     pass
 
 
 class TagListCreate(generics.ListCreateAPIView):
@@ -501,6 +480,3 @@ class TagListCreate(generics.ListCreateAPIView):
     http_method_names = ['get', 'post']
     queryset = Tag.objects.all()
     lookup_field = 'id'
-
-    # def get_queryset(self):
-    #     Tag.objects.all()
