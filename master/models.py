@@ -233,7 +233,7 @@ class Exercise(models.Model):
         return self.title
 
 
-class ExerciseAnswer(models.Model):
+class Answer(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)

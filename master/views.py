@@ -3,14 +3,10 @@ from django.utils.crypto import get_random_string
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status, filters
-
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from .filters import ExerciseFilter
 from .serializers import *
-
 from .permissions import IsExerciseAuthor, IsExerciseAnswerer
 
 
@@ -436,32 +432,51 @@ class ExerciseRD(generics.RetrieveDestroyAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
-class ExerciseAnswerListCreate(generics.ListCreateAPIView):
-    serializer_class = ExerciseAnswerSerializer
+class AnswerList(generics.ListAPIView):
+    serializer_class = AnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    queryset = ExerciseAnswer.objects.all()
-    search_fields = ['id', 'title']
-    http_method_names = ['get', 'post']
 
     def perform_authentication(self, request):
-        if self.request.user.type != 's':
-            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
-
-    def perform_create(self, serializer):
-        ExerciseAnswer.objects.create(user=self.request.user)
-
-
-class ExerciseAnswerRUD(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ExerciseAnswerSerializer
-    permission_classes = [permissions.IsAuthenticated, IsExerciseAnswerer]
-    http_method_names = ['get', 'patch', 'delete']
-    queryset = ExerciseAnswer.objects.all()
-    lookup_field = 'id'
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 's':
-            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین دهند')
+        if self.request.user.type != 't':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def get_queryset(self):
-        return ExerciseAnswer.objects.filter(id=self.kwargs['id'])
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'], author=self.request.user)
+        if exercise:
+            return Answer.objects.filter(exercise=exercise)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+
+class AnswerCreate(generics.CreateAPIView):
+    serializer_class = AnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 's':
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def perform_create(self, serializer):
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+        exerciseCourseStudent = CourseStudent.objects.filter(course=exercise.course)
+        if self.request.user in exerciseCourseStudent:
+            serializer.save(exercise=exercise, user=self.request.user)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+
+class AnswerRD(generics.RetrieveDestroyAPIView):
+    serializer_class = AnswerSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Answer.objects.all()
+
+    def perform_authentication(self, request):
+        if (self.request.user.type != 's') and (self.request.method == 'DELETE'):
+            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین را حذف کنند')
+
+    def delete(self, request, *args, **kwargs):
+        answer = Answer.objects.get(pk=self.kwargs['pk'])
+        if answer.user == self.request.user:
+            return self.destroy(self, request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')

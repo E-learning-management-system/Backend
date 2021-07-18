@@ -23,8 +23,7 @@ urlpatterns = [
     path('posts/<int:pk>/newcomment', ms.CommentCreate.as_view()),
     path('posts/<int:pk>/comments', ms.CommentList.as_view()),
     path('deletecomment/<int:pk>', ms.CommentDelete.as_view()),
-
-
-    path('answer/<int:id>', ms.ExerciseAnswerRUD.as_view()),
-
+    path('exercises/<int:pk>/answers/', ms.AnswerList.as_view()),
+    path('exercices/<int:pk>/newanswer', ms.AnswerCreate.as_view()),
+    path('answer/<int:pk>', ms.AnswerRD.as_view()),
 ]
