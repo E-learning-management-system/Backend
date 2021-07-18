@@ -1,8 +1,6 @@
 from django.contrib import admin
-from master.models import Course, CourseStudent, Exercise, ExerciseAnswer, Tag, User, Post, PostComment, PostLike, \
+from master.models import Course, CourseStudent, Exercise, Answer, User, Post, PostComment, PostLike, Support, \
     Subject
-
-admin.site.register(Tag)
 
 
 class ExerciseInline(admin.StackedInline):
@@ -19,6 +17,11 @@ class CourseStudentInline(admin.StackedInline):
 
 class PostInline(admin.StackedInline):
     model = Post
+
+
+class SupportAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'subject']
+    list_filter = ['name']
 
 
 class CourseStudentAdmin(admin.ModelAdmin):
@@ -73,16 +76,16 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ['id']
 
 
-class ExerciseAnswerInline(admin.StackedInline):
-    model = ExerciseAnswer
+class AnswerInline(admin.StackedInline):
+    model = Answer
 
 
-class ExerciseAnswerAdmin(admin.ModelAdmin):
+class AnswerAdmin(admin.ModelAdmin):
     list_display = ['user', 'exercise', 'date', 'file']
 
 
 class ExerciseAdmin(admin.ModelAdmin):
-    inlines = [ExerciseAnswerInline]
+    inlines = [AnswerInline]
     list_display = ('title', 'course', 'subject', 'author', 'deadline')
     list_filter = ('author', 'deadline', 'subject')
 
@@ -95,4 +98,5 @@ admin.site.register(CourseStudent, CourseStudentAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(PostLike, LikeAdmin)
 admin.site.register(PostComment, CommentAdmin)
-admin.site.register(ExerciseAnswer, ExerciseAnswerAdmin)
+admin.site.register(Answer, AnswerAdmin)
+admin.site.register(Support, SupportAdmin)

@@ -75,6 +75,9 @@ class SigninSerializer(serializers.Serializer):
                                      write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
     token = serializers.CharField(label='توکن', read_only=True)
 
+    class Meta:
+        model = User
+
     def validate(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
@@ -129,6 +132,14 @@ class Verification(serializers.Serializer):
 
         attrs['code'] = code
         return attrs
+
+
+class Support(serializers.ModelSerializer):
+    date = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Support
+        fields = ['id', 'name', 'email', 'phone', 'subject', 'description', 'date']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -211,32 +222,24 @@ class SubjectSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'course_name', 'course_id', 'teacher']
 
 
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'title', 'link']
-        read_only_fields = ['id', 'title', 'link']
-
-
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    course = CourseSerializer(read_only=True)
-    subject = SubjectSerializer(read_only=True)
+    author = serializers.ReadOnlyField(source='author.username')
+    course_id = serializers.ReadOnlyField(source='course.id')
+    course_title = serializers.ReadOnlyField(source='course.title')
+    subject_id = serializers.ReadOnlyField(source='subject.id')
+    subject_title = serializers.ReadOnlyField(source='subject.id')
 
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'file', 'course',
-                  'subject']
-        read_only_fields = ['id', 'title', 'description', 'author', 'date', 'deadline', 'tags', 'course',
-                            'subject']
+        fields = ['id', 'title', 'description', 'author', 'course_id', 'course_title', 'subject_id', 'subject_title',
+                  'date', 'deadline', 'file']
 
 
-class ExerciseAnswerSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    exercise = ExerciseSerializer(read_only=True)
+class AnswerSerializer(serializers.ModelSerializer):
+    exercise_id = serializers.ReadOnlyField(source='exercise.id')
+    exercise_title = serializers.ReadOnlyField(source='exercise.title')
+    user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
-        model = ExerciseAnswer
-        fields = ['id', 'user', 'exercise', 'file', 'date']
-        read_only_fields = ['id', 'user', 'exercise', 'date']
+        model = Answer
+        fields = ['id', 'exercise_id', 'exercise_title', 'user', 'description', 'date', 'file']

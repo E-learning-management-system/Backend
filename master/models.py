@@ -111,6 +111,23 @@ class User(PermissionsMixin, AbstractBaseUser):
         ordering = ['username']
 
 
+class Support(models.Model):
+    name = models.CharField(verbose_name='نام و نام خانوادگی', max_length=30)
+    email = models.EmailField(verbose_name='ایمیل')
+    phone = models.CharField(verbose_name='شماره همراه', max_length=15)
+    subject = models.CharField(verbose_name='موضوع', max_length=50)
+    description = models.CharField(verbose_name='متن پیام', max_length=2000)
+    date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'پشتیبانی'
+        verbose_name_plural = 'پشتیبانی ها'
+        ordering = ['date']
+
+
 class Course(models.Model):
     title = models.CharField(verbose_name='عنوان', max_length=255)
     description = models.TextField(verbose_name='توضیحات', max_length=1000, blank=True, null=True)
@@ -215,7 +232,6 @@ class Exercise(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
-    tags = models.ManyToManyField('Tag', blank=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
     file = models.FileField(upload_to=exercise_image_directory_path, null=True, blank=True,
@@ -234,7 +250,7 @@ class Exercise(models.Model):
         return self.title
 
 
-class ExerciseAnswer(models.Model):
+class Answer(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     exercise = models.ForeignKey('Exercise', verbose_name='تمرین', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='دانشجو', on_delete=models.CASCADE)
@@ -254,15 +270,3 @@ class ExerciseAnswer(models.Model):
 
     def __str__(self):
         return '{0} on {1}'.format(self.user, self.date)
-
-
-class Tag(models.Model):
-    title = models.CharField(max_length=600)
-    link = models.CharField(max_length=1000)
-
-    def __str__(self):
-        return str(self.title)
-
-    class Meta:
-        verbose_name = 'تگ'
-        verbose_name_plural = 'تگ ها'
