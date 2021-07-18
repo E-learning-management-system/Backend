@@ -1,5 +1,5 @@
 from django.contrib import admin
-from master.models import Course, CourseStudent, Exercise, Answer, User, Post, PostComment, PostLike, \
+from master.models import Course, CourseStudent, Exercise, Answer, User, Post, PostComment, PostLike, Support, \
     Subject
 
 
@@ -17,6 +17,11 @@ class CourseStudentInline(admin.StackedInline):
 
 class PostInline(admin.StackedInline):
     model = Post
+
+
+class SupportAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'subject']
+    list_filter = ['name']
 
 
 class CourseStudentAdmin(admin.ModelAdmin):
@@ -94,3 +99,4 @@ admin.site.register(Post, PostAdmin)
 admin.site.register(PostLike, LikeAdmin)
 admin.site.register(PostComment, CommentAdmin)
 admin.site.register(Answer, AnswerAdmin)
+admin.site.register(Support, SupportAdmin)

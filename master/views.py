@@ -1,13 +1,11 @@
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import generics, permissions, status, filters
+from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import *
-from .permissions import IsExerciseAuthor, IsExerciseAnswerer
 
 
 class Signup(generics.CreateAPIView):
@@ -92,12 +90,20 @@ class Verification(generics.GenericAPIView):
         return Response(data)
 
 
-class profile(generics.RetrieveUpdateAPIView):
+class Profile(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+class Support(generics.CreateAPIView):
+    serializer_class = Support
+    permissions = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 class CourseList(generics.ListAPIView):

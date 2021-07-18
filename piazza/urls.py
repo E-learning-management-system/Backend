@@ -13,7 +13,8 @@ urlpatterns = [
     path('signin/', ms.Signin.as_view(), name='signin'),
     path('signin/forgotpassword/', ms.ForgotPassword.as_view(), name='forgot_password'),
     path('signin/forgotpassword/verification/', ms.Verification.as_view(), name='verification'),
-    path('profile/', ms.profile.as_view(), name='profile'),
+    path('profile/', ms.Profile.as_view(), name='profile'),
+    path('support/', ms.Support.as_view(), name='support'),
 
     path('admin/', admin.site.urls),
     # documentations

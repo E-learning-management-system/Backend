@@ -111,6 +111,23 @@ class User(PermissionsMixin, AbstractBaseUser):
         ordering = ['username']
 
 
+class Support(models.Model):
+    name = models.CharField(verbose_name='نام و نام خانوادگی', max_length=30)
+    email = models.EmailField(verbose_name='ایمیل')
+    phone = models.CharField(verbose_name='شماره همراه', max_length=15)
+    subject = models.CharField(verbose_name='موضوع', max_length=50)
+    description = models.CharField(verbose_name='متن پیام', max_length=2000)
+    date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'پشتیبانی'
+        verbose_name_plural = 'پشتیبانی ها'
+        ordering = ['date']
+
+
 class Course(models.Model):
     title = models.CharField(verbose_name='عنوان', max_length=255)
     description = models.TextField(verbose_name='توضیحات', max_length=1000, blank=True, null=True)
@@ -253,6 +270,3 @@ class Answer(models.Model):
 
     def __str__(self):
         return '{0} on {1}'.format(self.user, self.date)
-
-
-

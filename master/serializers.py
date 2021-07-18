@@ -75,6 +75,9 @@ class SigninSerializer(serializers.Serializer):
                                      write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
     token = serializers.CharField(label='توکن', read_only=True)
 
+    class Meta:
+        model = User
+
     def validate(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
@@ -130,8 +133,13 @@ class Verification(serializers.Serializer):
         attrs['code'] = code
         return attrs
 
+
+class Support(serializers.ModelSerializer):
+    date = serializers.ReadOnlyField()
+
     class Meta:
-        model = User
+        model = Support
+        fields = ['id', 'name', 'email', 'phone', 'subject', 'description', 'date']
 
 
 class CourseSerializer(serializers.ModelSerializer):
