@@ -187,7 +187,7 @@ class CourseStudentCreate(generics.CreateAPIView):
             if user:
                 serializer.save(course=course, user=User.objects.get(email=self.kwargs['email']))
             else:
-                raise ValidationError('دانشجویی با این نام کاربری موجود نیست')
+                raise ValidationError('دانشجویی با این ایمیل موجود نیست')
         else:
             raise ValidationError('Access Denied')
 
