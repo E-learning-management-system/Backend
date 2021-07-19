@@ -171,6 +171,7 @@ class Post(models.Model):
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, default=None)
     poster = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
                                on_delete=models.CASCADE)
+    subject = models.CharField(max_length=50, verbose_name='موضوع', null=True, blank=True, default=None)
     text = models.TextField(verbose_name='متن')
     date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
     file = models.FileField(upload_to=post_image_directory_path, null=True, blank=True,
