@@ -180,6 +180,7 @@ class CourseRUDSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('تاریخ امتحان باید بعد از تاریخ آغاز باشد.')
         return attrs
 
+
 class CourseStudentSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')

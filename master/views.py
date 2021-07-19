@@ -183,9 +183,9 @@ class CourseStudentCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         course = Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
         if course:
-            user = User.objects.get(username=self.kwargs['username'], type='s')
+            user = User.objects.get(email=self.kwargs['email'], type='s')
             if user:
-                serializer.save(course=course, user=User.objects.get(username=self.kwargs['username']))
+                serializer.save(course=course, user=User.objects.get(email=self.kwargs['email']))
             else:
                 raise ValidationError('دانشجویی با این نام کاربری موجود نیست')
         else:
