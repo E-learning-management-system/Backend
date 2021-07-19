@@ -149,6 +149,17 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = ['id', 'title', 'description', 'teacher', 'start_date', 'end_date', 'exam_date']
 
+    def validate(self, attrs):
+        startdate = attrs.get('start_date')
+        enddate = attrs.get('end_date')
+        examdate = attrs.get('exam_date')
+
+        if startdate > enddate:
+            raise serializers.ValidationError('تاریخ پایان باید بعد از تاریخ آغاز باشد.')
+        if examdate < startdate:
+            raise serializers.ValidationError('تاریخ امتحان باید بعد از تاریخ آغاز باشد.')
+        return attrs
+
 
 class CourseRUDSerializer(serializers.ModelSerializer):
     teacher = serializers.ReadOnlyField(source='teacher.username')
@@ -158,6 +169,16 @@ class CourseRUDSerializer(serializers.ModelSerializer):
         model = Course
         fields = ['id', 'course_title', 'teacher', 'description', 'start_date', 'end_date', 'exam_date']
 
+    def validate(self, attrs):
+        startdate = attrs.get('start_date')
+        enddate = attrs.get('end_date')
+        examdate = attrs.get('exam_date')
+
+        if startdate > enddate:
+            raise serializers.ValidationError('تاریخ پایان باید بعد از تاریخ آغاز باشد.')
+        if examdate < startdate:
+            raise serializers.ValidationError('تاریخ امتحان باید بعد از تاریخ آغاز باشد.')
+        return attrs
 
 class CourseStudentSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
