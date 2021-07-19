@@ -6,7 +6,7 @@ urlpatterns = [
     path('newcourse/', ms.CourseCreate.as_view()),
     path('course-rud/<int:pk>/', ms.CourseRUD.as_view()),
     path('courses/<int:pk>/students/', ms.CourseStudentList.as_view()),
-    path('courses/<int:pk>/newstudent/<str:username>', ms.CourseStudentCreate.as_view()),
+    path('courses/<int:pk>/newstudent/<str:email>', ms.CourseStudentCreate.as_view()),
     path('student-rd/<int:pk>/', ms.CourseStudentRD.as_view()),
     path('courses/<int:pk>/subjects/', ms.SubjectList.as_view()),
     path('courses/<int:pk>/newsubject/', ms.SubjectCreate.as_view()),
