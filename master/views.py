@@ -495,5 +495,6 @@ class StudentExerciseList(generics.ListAPIView):
     http_method_names = ['get']
 
     def get_queryset(self):
-        studentCourses = CourseStudent.objects.filter(user=self.request.user).values_list('course').distinct()
-        return Exercise.objects.filter(Q(course__in=[studentCourses]))
+        studentCourses = list(
+            CourseStudent.objects.filter(user=self.request.user).values_list('course', flat=True).distinct())
+        return Exercise.objects.filter(Q(course__in=studentCourses))
