@@ -14,12 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'password', 'university', 'type', 'first_name', 'last_name',
                   'phone', 'state', 'city', 'photo', 'date_joined']
 
-    def update(self, instance, validated_data):
-        instance.password = validated_data.get('password', instance.password)
-        instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
-
 
 TYPE_CHOICES = [
     ('t', 'استاد'),
