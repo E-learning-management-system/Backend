@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.utils.crypto import get_random_string
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
@@ -486,3 +487,14 @@ class AnswerRD(generics.RetrieveDestroyAPIView):
             return self.destroy(self, request, *args, **kwargs)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
+
+
+class StudentExerciseList(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        courses = CourseStudent.objects.filter(user=self.request.user).course_set.all()
+        print(courses)
+        return Exercise.objects.filter(Q(course__in=[courses]))
