@@ -494,6 +494,10 @@ class StudentExerciseList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
 
+    def perform_authentication(self, request):
+        if self.request.user.type != 's':
+            raise ValidationError('فقط دانشجویان میتوانند تمارین خود را ببینند')
+
     def get_queryset(self):
         studentCourses = list(
             CourseStudent.objects.filter(user=self.request.user).values_list('course', flat=True).distinct())
