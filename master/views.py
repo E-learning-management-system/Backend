@@ -502,3 +502,16 @@ class StudentExerciseList(generics.ListAPIView):
         studentCourses = list(
             CourseStudent.objects.filter(user=self.request.user).values_list('course', flat=True).distinct())
         return Exercise.objects.filter(Q(course__in=studentCourses))
+
+
+class TeacherExerciseList(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get']
+
+    def perform_authentication(self, request):
+        if self.request.user.type != 't':
+            raise ValidationError('فقط اساتید میتوانند تمارین خود را ببینند')
+
+    def get_queryset(self):
+        return Exercise.objects.filter(author=self.request.user)

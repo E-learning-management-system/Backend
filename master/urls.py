@@ -27,4 +27,5 @@ urlpatterns = [
     path('exercices/<int:pk>/newanswer', ms.AnswerCreate.as_view()),
     path('answer/<int:pk>', ms.AnswerRD.as_view()),
     path('studentExercises/', ms.StudentExerciseList.as_view()),
+    path('teacherExercises/', ms.TeacherExerciseList.as_view()),
 ]
