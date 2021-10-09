@@ -84,12 +84,16 @@ WSGI_APPLICATION = 'piazza.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.mysql'),
-        'NAME': os.environ.get('SQL_DATABASE', 'piazza_db'),
-        'USER': os.environ.get('SQL_USER', 'piazza'),
-        'PASSWORD': os.environ.get('SQL_PASSWORD', 'piazza_1234'),
-        'HOST': os.environ.get('SQL_HOST', 'localhost'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
+    # 'default': {
+    #     'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.mysql'),
+    #     'NAME': os.environ.get('SQL_DATABASE', 'piazza_db'),
+    #     'USER': os.environ.get('SQL_USER', 'piazza'),
+    #     'PASSWORD': os.environ.get('SQL_PASSWORD', 'piazza_1234'),
+    #     'HOST': os.environ.get('SQL_HOST', 'localhost'),
+    # }
 }
 
 AUTH_PASSWORD_VALIDATORS = [

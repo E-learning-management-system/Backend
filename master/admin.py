@@ -38,9 +38,9 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 class UAdmin(admin.ModelAdmin):
-    list_display = ['username', 'first_name', 'last_name', 'type', 'university', 'photo', 'date_joined']
+    list_display = ['email', 'name', 'type', 'university', 'photo', 'date_joined']
     list_filter = ['type', 'university', 'date_joined']
-    search_fields = ['username']
+    search_fields = ['email']
     inlines = [CourseStudentInline]
 
 

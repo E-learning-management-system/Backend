@@ -7,19 +7,19 @@ from django.template.defaultfilters import filesizeformat
 
 
 def user_photo_directory_path(instance, filename):
-    return 'user/{0}/photo/{1}'.format(str(instance.username), filename)
+    return 'user/{0}/photo/{1}'.format(str(instance.email), filename)
 
 
 def post_image_directory_path(instance, filename):
-    return 'user/{0}/post/{1}'.format(str(instance.poster.username), filename)
+    return 'user/{0}/post/{1}'.format(str(instance.poster.email), filename)
 
 
 def exercise_image_directory_path(instance, filename):
-    return 'user/{0}/exercise/{1}'.format(str(instance.author.username), filename)
+    return 'user/{0}/exercise/{1}'.format(str(instance.author.email), filename)
 
 
 def exercise_ans_image_directory_path(instance, filename):
-    return 'user/{0}/exercise_ans/{1}'.format(str(instance.user.username), filename)
+    return 'user/{0}/exercise_ans/{1}'.format(str(instance.user.email), filename)
 
 
 def validate_image_size(image):
@@ -37,9 +37,7 @@ TYPE_CHOICES = [
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, username, type=None, university=None, email=None, password=None):
-        if not username:
-            raise ValueError('Users must have a username')
+    def create_user(self, type=None, university=None, email=None, password=None):
         if not university:
             raise ValueError('Users must have a university')
         if not email:
@@ -48,7 +46,6 @@ class UserManager(BaseUserManager):
             raise ValueError('Users must have a password')
 
         user = self.model(
-            username=username,
             type=type,
             university=university,
             email=email
@@ -57,14 +54,14 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, password=None):
-        if not username:
-            raise ValueError('Users must have a username')
+    def create_superuser(self, email, password=None):
+        if not email:
+            raise ValueError('Users must have an email')
         if not password:
             raise ValueError('Users must have a password')
 
         user = self.model(
-            username=username,
+            email=email,
         )
         user.set_password(password)
         user.is_admin = True
@@ -77,38 +74,34 @@ class UserManager(BaseUserManager):
 class User(PermissionsMixin, AbstractBaseUser):
     VALID_PHOTO_EXTENTION = ['jpg', 'png', 'jpeg']
 
-    first_name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
-    last_name = models.CharField(verbose_name="نام خانوادگی", blank=True, null=True, max_length=20)
+    name = models.CharField(verbose_name="نام", blank=True, null=True, max_length=20)
     university = models.CharField(verbose_name="دانشگاه", max_length=50, null=True, blank=True)
     email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100, null=True, blank=True)
-    username = models.CharField(verbose_name="نام کاربری", unique=True, max_length=20)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
     type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES, null=True, blank=True)
     is_staff = models.BooleanField(verbose_name='کارمند', default=False)
     is_superuser = models.BooleanField(verbose_name='ابرکاربر', default=False)
-    phone = models.IntegerField(verbose_name="شماره همراه", null=True, blank=True)
     code = models.IntegerField(verbose_name="کد یکبار مصرف", null=True, blank=True)
-    state = models.CharField(verbose_name="استان", null=True, max_length=30, blank=True)
-    city = models.CharField(verbose_name="شهر", null=True, max_length=30, blank=True)
+    bio = models.CharField(verbose_name="بیو", null=True, max_length=30, blank=True)
     photo = models.ImageField(verbose_name="تصویر پروفایل",
                               validators=[FileExtensionValidator(VALID_PHOTO_EXTENTION), validate_image_size],
                               upload_to=user_photo_directory_path, null=True,
                               blank=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
     REQUIRED_FIELDS = []
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     objects = UserManager()
 
     def __str__(self):
-        if (self.first_name is not None) and (self.last_name is not None):
-            return str(self.first_name + ' ' + self.last_name)
+        if self.name is not None:
+            return str(self.name)
         else:
-            return str(self.username)
+            return str(self.email)
 
     class Meta:
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
-        ordering = ['username']
+        ordering = ['date_joined']
 
 
 class Support(models.Model):
@@ -139,8 +132,8 @@ class Course(models.Model):
     student = models.ManyToManyField(User, verbose_name='دانشجویان', through='CourseStudent', blank=True)
 
     def __str__(self):
-        if self.teacher.last_name is not None:
-            return str(self.title) + ' ' + str(self.teacher.last_name)
+        if self.teacher.name is not None:
+            return str(self.title) + ' ' + str(self.teacher.name)
         else:
             return str(self.title) + ' ' + str(self.teacher)
 
@@ -156,10 +149,10 @@ class CourseStudent(models.Model):
                              limit_choices_to={'type': 's'})
 
     def __str__(self):
-        if (self.user.first_name is not None) and (self.user.last_name is not None):
-            return str(self.user.first_name + ' ' + self.user.last_name)
+        if self.user.name is not None:
+            return str(self.user.name)
         else:
-            return str(self.user.username)
+            return str(self.user.email)
 
     class Meta:
         verbose_name = 'دانشجو'

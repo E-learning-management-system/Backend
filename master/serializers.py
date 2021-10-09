@@ -11,8 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'university', 'type', 'first_name', 'last_name',
-                  'phone', 'state', 'city', 'photo', 'date_joined']
+        fields = ['id', 'email', 'password', 'university', 'type', 'name',
+                  'bio', 'photo', 'date_joined']
 
 
 TYPE_CHOICES = [
@@ -25,28 +25,25 @@ class SignupSerializer(serializers.Serializer):
     type = serializers.ChoiceField(TYPE_CHOICES, label='نقش')
     university = serializers.CharField(label='دانشگاه', write_only=True)
     email = serializers.EmailField(label='ایمیل', write_only=True)
-    username = serializers.CharField(label='نام کاربری', write_only=True)
     password = serializers.CharField(label='رمز عبور', min_length=4,
                                      write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
+    password_confirmation = serializers.CharField(label='تکرار رمز عبور', min_length=4,
+                                                  write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 
     def validate(self, attrs):
         type = attrs.get('type')
         university = attrs.get('university')
         email = attrs.get('email')
-        username = attrs.get('username')
         password = attrs.get('password')
-        if type and university and email and username and password:
+        if type and university and email  and password:
             user = authenticate(request=self.context.get('request'), type=type, university=university, email=email,
-                                username=username, password=password)
+                                password=password)
             user1 = User.objects.filter(email=email)
-            user2 = User.objects.filter(username=username)
             if user:
                 raise serializers.ValidationError('کاربر موجود است!', code='conflict')
             if user1:
                 raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
-            if user2:
-                raise serializers.ValidationError('این نام کاربری موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
 
@@ -56,15 +53,14 @@ class SignupSerializer(serializers.Serializer):
         type = validated_data['type']
         university = validated_data['university']
         email = validated_data['email']
-        username = validated_data['username']
         password = validated_data['password']
 
-        user = User.objects.create_user(username, type, university, email, password)
+        user = User.objects.create_user(type, university, email, password)
         return user
 
 
 class SigninSerializer(serializers.Serializer):
-    username = serializers.CharField(label='نام کاربری', write_only=True)
+    email = serializers.CharField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', min_length=4,
                                      write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
     token = serializers.CharField(label='توکن', read_only=True)
@@ -73,11 +69,11 @@ class SigninSerializer(serializers.Serializer):
         model = User
 
     def validate(self, attrs):
-        username = attrs.get('username')
+        email = attrs.get('email')
         password = attrs.get('password')
-        if username and password:
+        if email and password:
             user = authenticate(request=self.context.get('request'),
-                                username=username, password=password)
+                                email=email, password=password)
             if not user:
                 raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
         else:
@@ -156,7 +152,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class CourseRUDSerializer(serializers.ModelSerializer):
-    teacher = serializers.ReadOnlyField(source='teacher.username')
+    teacher = serializers.ReadOnlyField(source='teacher.email')
     course_title = serializers.ReadOnlyField(source='course.title')
 
     class Meta:
@@ -178,13 +174,13 @@ class CourseRUDSerializer(serializers.ModelSerializer):
 class CourseStudentSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
-    course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
-    username = serializers.ReadOnlyField(source='user.username')
+    course_teacher = serializers.ReadOnlyField(source='course.teacher.email')
+    email = serializers.ReadOnlyField(source='user.email')
     user_id = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = CourseStudent
-        fields = ['id', 'username', 'user_id', 'course_id', 'course_title', 'course_teacher']
+        fields = ['id', 'email', 'user_id', 'course_id', 'course_title', 'course_teacher']
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -193,15 +189,14 @@ class PostSerializer(serializers.ModelSerializer):
 
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
-    course_teacher = serializers.ReadOnlyField(source='course.teacher.username')
+    course_teacher = serializers.ReadOnlyField(source='course.teacher.email')
     poster_id = serializers.ReadOnlyField(source='poster.id')
-    poster_username = serializers.ReadOnlyField(source='poster.username')
+    poster_email = serializers.ReadOnlyField(source='poster.email')
 
     class Meta:
         model = Post
-        fields = ['id', 'poster_id', 'poster_username', 'course_teacher', 'course_id', 'course_title','subject', 'text', 'date',
-                  'file', 'comments',
-                  'likes']
+        fields = ['id', 'poster_id', 'poster_email', 'course_teacher', 'course_id', 'course_title', 'subject',
+                  'text', 'date', 'file', 'comments', 'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
@@ -212,16 +207,16 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
-    user_username = serializers.ReadOnlyField(source='user.username')
+    user_email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = PostComment
-        fields = ['id', 'post_id', 'user_username', 'text', 'date']
+        fields = ['id', 'post_id', 'user_email', 'text', 'date']
 
 
 class LikeSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
-    user = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = PostLike
@@ -231,7 +226,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class SubjectSerializer(serializers.ModelSerializer):
     course_id = serializers.ReadOnlyField(source='course.id')
     course_name = serializers.ReadOnlyField(source='course.title')
-    teacher = serializers.ReadOnlyField(source='course.teacher.username')
+    teacher = serializers.ReadOnlyField(source='course.teacher.email')
 
     class Meta:
         model = Subject
@@ -239,7 +234,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.ReadOnlyField(source='author.email')
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
     subject_id = serializers.ReadOnlyField(source='subject.id')
@@ -254,7 +249,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     exercise_id = serializers.ReadOnlyField(source='exercise.id')
     exercise_title = serializers.ReadOnlyField(source='exercise.title')
-    user = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = Answer
