@@ -6,8 +6,6 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField(label='تاریخ عضویت')
     email = serializers.ReadOnlyField(label='ایمیل')
-    password = serializers.CharField(label='رمز عبور', min_length=4, required=False,
-                                     help_text='رمز عبور باید حداقل 4 رقمی باشد')
 
     class Meta:
         model = User
@@ -36,7 +34,9 @@ class SignupSerializer(serializers.Serializer):
         university = attrs.get('university')
         email = attrs.get('email')
         password = attrs.get('password')
-        if type and university and email  and password:
+        password_confirmation = attrs.get('password_confirmation')
+
+        if type and university and email and password and password_confirmation:
             user = authenticate(request=self.context.get('request'), type=type, university=university, email=email,
                                 password=password)
             user1 = User.objects.filter(email=email)
@@ -44,6 +44,8 @@ class SignupSerializer(serializers.Serializer):
                 raise serializers.ValidationError('کاربر موجود است!', code='conflict')
             if user1:
                 raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
+            if password != password_confirmation :
+                raise serializers.ValidationError('رمز عبور با تکرارش یکسان نیست!', code='conflict')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
 
