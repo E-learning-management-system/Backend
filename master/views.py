@@ -62,7 +62,7 @@ class ForgotPassword(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.filter(email=serializer.validated_data['email'])
-        code = get_random_string(length=6, allowed_chars='1234567890')
+        code = get_random_string(length=8, allowed_chars='1234567890')
         if user:
             user = user.first()
             user.code = code
@@ -77,18 +77,31 @@ class ForgotPassword(generics.CreateAPIView):
         return Response(email)
 
 
-class Verification(generics.GenericAPIView):
+class Verification(generics.UpdateAPIView):
     serializer_class = Verification
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = User.objects.filter(code=serializer.validated_data['code'])
-        if user:
-            user = user.first()
+        user = serializer.validated_data['user']
         token, create = Token.objects.get_or_create(user=user)
         data = {'token': token.key}
         return Response(data)
+
+
+class FPChangePassword(generics.UpdateAPIView):
+    serializer_class = FPChangePasswordSerializer
+    model = User
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class Profile(generics.RetrieveUpdateAPIView):
