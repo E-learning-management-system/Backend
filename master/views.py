@@ -99,6 +99,21 @@ class Profile(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class ChangePassword(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+
 class Support(generics.CreateAPIView):
     serializer_class = Support
     permissions = [permissions.AllowAny]

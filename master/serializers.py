@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
 from .models import *
 
@@ -124,6 +124,33 @@ class Verification(serializers.Serializer):
 
         attrs['code'] = code
         return attrs
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(label='رمز عبور قبلی', min_length=4, required=True,
+                                         write_only=True)
+    new_password = serializers.CharField(label='رمز عبور حدید', min_length=4, required=True,
+                                         write_only=True, help_text='رمز عبور باید حداقل 4 رقمی باشد')
+    new_password_confirmation = serializers.CharField(label='تکرار رمز عبور جدید', min_length=4,
+                                                      required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError('رمز عبور قبلی اشتباه است!')
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['new_password_confirmation']:
+            raise serializers.ValidationError('رمز عبور با تکرارش یکسان نیست!', code='conflict')
+        return data
+
+    def save(self, **kwargs):
+        password = self.validated_data['new_password']
+        user = self.context['request'].user
+        user.set_password(password)
+        user.save()
+        return user
 
 
 class Support(serializers.ModelSerializer):
