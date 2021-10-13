@@ -31,14 +31,35 @@ class Signup(generics.CreateAPIView):
         user = User.objects.get(type=serializer.validated_data['type'],
                                 university=serializer.validated_data['university'],
                                 email=serializer.validated_data['email'])
+        user1 = User.objects.filter(email=serializer.validated_data['email'])
+        code = get_random_string(length=8, allowed_chars='1234567890')
+        if user1:
+            user1 = user1.first()
+            user1.code = code
+            user1.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
+        data = 'به سورن خوش آمدید\nرمز یکبار مصرف : {0}'.format(str(code))
         send_mail('سورن',
-                  'به سورن خوش آمدید!',
+                  data,
                   'no-reply-khu@markop.ir',
                   [mail])
+        email = serializer.validated_data['email']
+        return Response(email, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class SVerification(generics.UpdateAPIView):
+    serializer_class = SVerification
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        if user:
+            user.is_active = True
+            user.save()
         token, create = Token.objects.get_or_create(user=user)
         data = {'token': token.key}
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data)
 
 
 class Signin(generics.GenericAPIView):
@@ -111,6 +132,18 @@ class Profile(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
+class DeleteAccount(generics.UpdateAPIView):
+    serializer_class = DeleteAccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer

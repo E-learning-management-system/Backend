@@ -60,6 +60,30 @@ class SignupSerializer(serializers.Serializer):
         return user
 
 
+class SVerification(serializers.Serializer):
+    email = serializers.EmailField(label='ایمیل', write_only=True)
+    code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
+    token = serializers.CharField(label='توکن', read_only=True)
+
+    class Meta:
+        model = User
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        code = attrs.get('code')
+        if email and code:
+            user = User.objects.filter(email=email, code=code)
+            if user:
+                user = user.first()
+            if not user:
+                raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
+        else:
+            raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
+
+        attrs['user'] = user
+        return attrs
+
+
 class SigninSerializer(serializers.Serializer):
     email = serializers.CharField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', write_only=True)
@@ -103,7 +127,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
 class Verification(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
-    code = serializers.CharField(label='کد یکبار مصرف', max_length=8, write_only=True)
+    code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 
     class Meta:
@@ -141,6 +165,22 @@ class FPChangePasswordSerializer(serializers.Serializer):
         password = self.validated_data['new_password']
         user = self.context['request'].user
         user.set_password(password)
+        user.save()
+        return user
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    password = serializers.CharField(label='رمز عبور', write_only=True)
+
+    def validate_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError('رمز عبور اشتباه است!')
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.is_active = False
         user.save()
         return user
 

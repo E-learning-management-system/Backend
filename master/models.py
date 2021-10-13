@@ -67,6 +67,7 @@ class UserManager(BaseUserManager):
         user.is_admin = True
         user.is_superuser = True
         user.is_staff = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 
@@ -78,10 +79,11 @@ class User(PermissionsMixin, AbstractBaseUser):
     university = models.CharField(verbose_name="دانشگاه", max_length=50, null=True, blank=True)
     email = models.EmailField(verbose_name="ایمیل", unique=True, max_length=100, null=True, blank=True)
     password = models.TextField(verbose_name="رمز عبور", max_length=2000)
-    password_confirmation = models.TextField(verbose_name="تکرار رمز عبور",blank=True, null=True, max_length=2000)
+    password_confirmation = models.TextField(verbose_name="تکرار رمز عبور", blank=True, null=True, max_length=2000)
     type = models.CharField(verbose_name="نقش", max_length=1, choices=TYPE_CHOICES, null=True, blank=True)
     is_staff = models.BooleanField(verbose_name='کارمند', default=False)
     is_superuser = models.BooleanField(verbose_name='ابرکاربر', default=False)
+    is_active = models.BooleanField(verbose_name='فعال', default=False)
     code = models.IntegerField(verbose_name="کد یکبار مصرف", null=True, blank=True)
     bio = models.CharField(verbose_name="بیو", null=True, max_length=30, blank=True)
     photo = models.ImageField(verbose_name="تصویر پروفایل",
