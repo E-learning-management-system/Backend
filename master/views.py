@@ -49,7 +49,7 @@ class Signup(generics.CreateAPIView):
 
 
 class SVerification(generics.UpdateAPIView):
-    serializer_class = SVerification
+    serializer_class = Verification
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

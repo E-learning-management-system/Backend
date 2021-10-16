@@ -60,30 +60,6 @@ class SignupSerializer(serializers.Serializer):
         return user
 
 
-class SVerification(serializers.Serializer):
-    email = serializers.EmailField(label='ایمیل', write_only=True)
-    code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
-    token = serializers.CharField(label='توکن', read_only=True)
-
-    class Meta:
-        model = User
-
-    def validate(self, attrs):
-        email = attrs.get('email')
-        code = attrs.get('code')
-        if email and code:
-            user = User.objects.filter(email=email, code=code)
-            if user:
-                user = user.first()
-            if not user:
-                raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
-        else:
-            raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
-
-        attrs['user'] = user
-        return attrs
-
-
 class SigninSerializer(serializers.Serializer):
     email = serializers.CharField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', write_only=True)
