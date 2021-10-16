@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import *
+from . import permissions as p
 
 
 class Signup(generics.CreateAPIView):
@@ -145,6 +146,7 @@ class DeleteAccount(generics.UpdateAPIView):
             user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
+
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     model = User
@@ -181,24 +183,9 @@ class CourseList(generics.ListAPIView):
 
 class CourseCreate(generics.CreateAPIView):
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def perform_create(self, serializer):
-        """data = JSONParser().parse(self.request)
-        newtitle = data['title']
-        newdescription = data['description']
-        startdate = data['start_date']
-        enddate = data['end_date']
-        examdate = data['exam_date']
-        if startdate > enddate:
-            raise ValidationError('تاریخ شروع درس باید پیش از تاریخ پایان آن باشد')
-        elif examdate < startdate:
-            raise ValidationError('تاریخ امتحان باید بعد از تاریخ شروع کلاس ها باشد')
-        else:"""
         serializer.save(teacher=self.request.user)
 
 
@@ -224,11 +211,7 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
 
 class CourseStudentList(generics.ListAPIView):
     serializer_class = CourseStudentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user)
@@ -236,17 +219,13 @@ class CourseStudentList(generics.ListAPIView):
 
 class CourseStudentCreate(generics.CreateAPIView):
     serializer_class = CourseStudentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('Access Denied')
+    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def perform_create(self, serializer):
-        course = Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
-        if course:
-            user = User.objects.get(email=self.kwargs['email'], type='s')
-            if user:
+        course = Course.objects.filter(pk=self.kwargs['pk'], teacher=self.request.user)
+        if course.exists():
+            user = User.objects.filter(email=self.kwargs['email'], type='s')
+            if user.exists():
                 serializer.save(course=course, user=User.objects.get(email=self.kwargs['email']))
             else:
                 raise ValidationError('دانشجویی با این ایمیل موجود نیست')
@@ -256,12 +235,8 @@ class CourseStudentCreate(generics.CreateAPIView):
 
 class CourseStudentRD(generics.RetrieveDestroyAPIView):
     serializer_class = CourseStudentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
     queryset = CourseStudent.objects.all()
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('Access Denied')
 
     def delete(self, request, *args, **kwargs):
         student = CourseStudent.objects.filter(pk=kwargs['pk'], course__teacher=self.request.user)
@@ -273,18 +248,15 @@ class CourseStudentRD(generics.RetrieveDestroyAPIView):
 
 class SubjectCreate(generics.CreateAPIView):
     serializer_class = SubjectSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def perform_create(self, serializer):
-        course = Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
-        if course:
+        course = Course.objects.filter(pk=self.kwargs['pk'], teacher=self.request.user)
+        if course.exists():
             serializer.save(course=course)
         else:
             raise ValidationError('Access Denied')
+
 
 
 class SubjectList(generics.ListAPIView):

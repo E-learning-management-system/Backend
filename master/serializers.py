@@ -42,7 +42,7 @@ class SignupSerializer(serializers.Serializer):
                 raise serializers.ValidationError('کاربر موجود است!', code='conflict')
             if user1:
                 raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
-            if password != password_confirmation :
+            if password != password_confirmation:
                 raise serializers.ValidationError('رمز عبور با تکرارش یکسان نیست!', code='conflict')
             password_validation.validate_password(attrs['password'], self.context['request'].user)
         else:
