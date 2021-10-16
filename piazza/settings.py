@@ -28,6 +28,8 @@ INSTALLED_APPS = [
 
     # django-filter, see: https://django-filter.readthedocs.io/en/latest/guide/rest_framework.html
     'django_filters',
+
+    'django_extensions',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
