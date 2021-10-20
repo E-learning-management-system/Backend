@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import *
 from . import permissions as p
+from django.shortcuts import get_object_or_404
 
 
 class Signup(generics.CreateAPIView):
@@ -265,7 +266,7 @@ class SubjectList(generics.ListAPIView):
 
     def get_queryset(self):
         if self.request.user.type == 't':
-            return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
+            return Course.objects.get_or_404(pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
         if self.request.user.type == 's':
             return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
 
