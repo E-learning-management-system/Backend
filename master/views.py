@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import *
 from . import permissions as p
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import get_object_or_404
 
 
 class Signup(generics.CreateAPIView):
@@ -176,10 +176,7 @@ class CourseList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.type == 't':
-            return Course.objects.filter(teacher=self.request.user)
-        elif self.request.user.type == 's':
-            return self.request.user.course_set.all()
+        return Course.objects.filter(Q(teacher=self.request.user) | Q(student__in=[self.request.user])).distinct()
 
 
 class CourseCreate(generics.CreateAPIView):
@@ -196,18 +193,12 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
 
     def perform_authentication(self, request):
-        if (self.request.user.type == 's') and (self.request.method == 'PUT'):
+        if (self.request.user.type == 's') and (self.request.method != 'GET'):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def delete(self, request, *args, **kwargs):
-        course = Course.objects.filter(teacher=self.request.user, pk=self.kwargs['pk'])
-        if self.request.user.type == 't':
-            if course.exists():
-                return self.destroy(request, *args, **kwargs)
-            else:
-                raise ValidationError('شما به این عمل دسترسی ندارید')
-        else:
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+        course = get_object_or_404(Course, teacher=self.request.user, pk=self.kwargs['pk'])
+        return self.destroy(request, *args, **kwargs)
 
 
 class CourseStudentList(generics.ListAPIView):
@@ -223,15 +214,9 @@ class CourseStudentCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def perform_create(self, serializer):
-        course = Course.objects.filter(pk=self.kwargs['pk'], teacher=self.request.user)
-        if course.exists():
-            user = User.objects.filter(email=self.kwargs['email'], type='s')
-            if user.exists():
-                serializer.save(course=course, user=User.objects.get(email=self.kwargs['email']))
-            else:
-                raise ValidationError('دانشجویی با این ایمیل موجود نیست')
-        else:
-            raise ValidationError('Access Denied')
+        course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
+        user = get_object_or_404(User, email=self.kwargs['email'], type='s')
+        serializer.save(course=course, user=User.objects.get(email=self.kwargs['email']))
 
 
 class CourseStudentRD(generics.RetrieveDestroyAPIView):
@@ -240,11 +225,8 @@ class CourseStudentRD(generics.RetrieveDestroyAPIView):
     queryset = CourseStudent.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        student = CourseStudent.objects.filter(pk=kwargs['pk'], course__teacher=self.request.user)
-        if student.exists():
-            return self.destroy(self, request, *args, **kwargs)
-        else:
-            raise ValidationError('Access Denied')
+        student = get_object_or_404(CourseStudent, pk=kwargs['pk'], course__teacher=self.request.user)
+        return self.destroy(self, request, *args, **kwargs)
 
 
 class SubjectCreate(generics.CreateAPIView):
@@ -252,12 +234,8 @@ class SubjectCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
 
     def perform_create(self, serializer):
-        course = Course.objects.filter(pk=self.kwargs['pk'], teacher=self.request.user)
-        if course.exists():
-            serializer.save(course=course)
-        else:
-            raise ValidationError('Access Denied')
-
+        course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
+        serializer.save(course=course)
 
 
 class SubjectList(generics.ListAPIView):
@@ -266,7 +244,7 @@ class SubjectList(generics.ListAPIView):
 
     def get_queryset(self):
         if self.request.user.type == 't':
-            return Course.objects.get_or_404(pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
+            return get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user).subject_set.all()
         if self.request.user.type == 's':
             return self.request.user.course_set.get(pk=self.kwargs['pk']).subject_set.all()
 
@@ -279,11 +257,8 @@ class SubjectRD(generics.RetrieveDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         if self.request.user.type != 't':
             raise ValidationError('شما به این عمل دسترسی ندارید')
-        subject = Subject.objects.filter(pk=kwargs['pk'], course__teacher=self.request.user)
-        if subject.exists():
-            return self.destroy(request, *args, **kwargs)
-        else:
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+        subject = get_object_or_404(Subject, pk=kwargs['pk'], course__teacher=self.request.user)
+        return self.destroy(request, *args, **kwargs)
 
 
 class PostList(generics.ListAPIView):

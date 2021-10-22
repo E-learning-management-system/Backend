@@ -128,8 +128,8 @@ class Course(models.Model):
     description = models.TextField(verbose_name='توضیحات', max_length=1000, blank=True, null=True)
     teacher = models.ForeignKey(User, verbose_name='استاد', related_name='teacher_course', on_delete=models.CASCADE,
                                 limit_choices_to={'type': 't'})
-    start_date = models.DateTimeField(verbose_name='تاریخ آغاز', default=None)
-    end_date = models.DateTimeField(verbose_name='تاریخ پایان')
+    start_date = models.DateField(verbose_name='تاریخ آغاز', default=None)
+    end_date = models.DateField(verbose_name='تاریخ پایان')
     exam_date = models.DateTimeField(verbose_name='تاریخ امتحان')
     student = models.ManyToManyField(User, verbose_name='دانشجویان', through='CourseStudent', blank=True)
 

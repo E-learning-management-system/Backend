@@ -20,7 +20,7 @@ class PostInline(admin.StackedInline):
 
 
 class SupportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'subject']
+    list_display = ['id', 'subject']
     list_filter = ['name']
 
 
@@ -38,7 +38,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 class UAdmin(admin.ModelAdmin):
-    list_display = ['email', 'name', 'type', 'university', 'photo', 'date_joined']
+    list_display = ['email', 'type', 'university', 'photo', 'date_joined']
     list_filter = ['type', 'university', 'date_joined']
     search_fields = ['email']
     inlines = [CourseStudentInline]
