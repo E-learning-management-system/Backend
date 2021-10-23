@@ -194,7 +194,7 @@ class Support(serializers.ModelSerializer):
 
     class Meta:
         model = Support
-        fields = ['id', 'name', 'email', 'phone', 'subject', 'description', 'date']
+        fields = ['id', 'email', 'title', 'description', 'date']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -299,7 +299,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.email')
+    teacher = serializers.ReadOnlyField(source='teacher.email')
     course_id = serializers.ReadOnlyField(source='course.id')
     course_title = serializers.ReadOnlyField(source='course.title')
     subject_id = serializers.ReadOnlyField(source='subject.id')

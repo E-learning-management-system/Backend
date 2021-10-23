@@ -20,8 +20,7 @@ class PostInline(admin.StackedInline):
 
 
 class SupportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'subject']
-    list_filter = ['name']
+    list_display = ['id', 'title']
 
 
 class CourseStudentAdmin(admin.ModelAdmin):
@@ -86,8 +85,8 @@ class AnswerAdmin(admin.ModelAdmin):
 
 class ExerciseAdmin(admin.ModelAdmin):
     inlines = [AnswerInline]
-    list_display = ('title', 'course', 'subject', 'author', 'deadline')
-    list_filter = ('author', 'deadline', 'subject')
+    list_display = ('title', 'course', 'subject', 'teacher', 'deadline')
+    list_filter = ('teacher', 'deadline', 'subject')
 
 
 admin.site.register(Subject, SubjectAdmin)

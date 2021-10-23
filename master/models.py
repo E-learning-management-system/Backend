@@ -107,11 +107,9 @@ class User(PermissionsMixin, AbstractBaseUser):
 
 
 class Support(models.Model):
-    name = models.CharField(verbose_name='نام و نام خانوادگی', max_length=30)
     email = models.EmailField(verbose_name='ایمیل')
-    phone = models.CharField(verbose_name='شماره همراه', max_length=15)
-    subject = models.CharField(verbose_name='موضوع', max_length=50)
-    description = models.CharField(verbose_name='متن پیام', max_length=2000)
+    title = models.CharField(verbose_name='موضوع', max_length=50)
+    description = models.TextField(verbose_name='متن پیام', max_length=2000)
     date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
 
     def __str__(self):
@@ -225,7 +223,7 @@ class Exercise(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     title = models.CharField(max_length=100, verbose_name='عنوان', unique=True)
     description = models.TextField(max_length=1000)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='استاد', limit_choices_to={'type': 't'})
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)

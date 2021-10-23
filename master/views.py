@@ -425,7 +425,7 @@ class ExerciseCreate(generics.CreateAPIView):
         course = subject.course
 
         if course.teacher == self.request.user:
-            serializer.save(course=course, subject=subject, author=self.request.user)
+            serializer.save(course=course, subject=subject, teacher=self.request.user)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
