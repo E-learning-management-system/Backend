@@ -44,6 +44,7 @@ class UAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
+    inlines = [PostInline]
     list_display = ['id', 'title', 'course']
     list_filter = ['course']
     search_fields = ['title']

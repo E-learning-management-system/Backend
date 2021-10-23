@@ -262,11 +262,11 @@ class PostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
 
-    course_id = serializers.ReadOnlyField(source='course.id')
-    course_title = serializers.ReadOnlyField(source='course.title')
+    course_id = serializers.ReadOnlyField(source='subject.course.id')
+    course_title = serializers.ReadOnlyField(source='subject.course.title')
     subject_id = serializers.ReadOnlyField(source='subject.id')
     subject_title = serializers.ReadOnlyField(source='subject.id')
-    course_teacher = serializers.ReadOnlyField(source='course.teacher.email')
+    course_teacher = serializers.ReadOnlyField(source='subject.course.teacher.email')
     user_id = serializers.ReadOnlyField(source='user.id')
     user_email = serializers.ReadOnlyField(source='user.email')
 

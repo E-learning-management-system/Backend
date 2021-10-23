@@ -173,7 +173,6 @@ class Subject(models.Model):
 
 class Post(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
-    course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, default=None)
     subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
                              on_delete=models.CASCADE)

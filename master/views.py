@@ -267,9 +267,9 @@ class PostList(generics.ListAPIView):
 
     def get_queryset(self):
         if self.request.user.type == 't':
-            return Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user).post_set.all()
+            return get_object_or_404(Subject, pk=self.kwargs['pk'], course__teacher=self.request.user).post_set.all()
         if self.request.user.type == 's':
-            return self.request.user.course_set.get(pk=self.kwargs['pk']).post_set.all()
+            return Post.objects.filter(subject=get_object_or_404(Subject, pk=self.kwargs['pk']), subject__course__in=[self.request.user.course_set.all()])
 
 
 class PostRD(generics.RetrieveDestroyAPIView):
@@ -291,16 +291,15 @@ class PostCreate(generics.CreateAPIView):
 
     def perform_authentication(self, request):
         if self.request.user.type == 't':
-            if Course.objects.get(pk=self.kwargs['pk']).teacher != self.request.user:
+            if get_object_or_404(Subject, pk=self.kwargs['pk']).course.teacher != self.request.user:
                 raise ValidationError('شما به این عمل دسترسی ندارید')
         elif self.request.user.type == 's':
-            user = self.request.user.course_set.get(pk=self.kwargs['pk'])
-            if not user:
+            subject = get_object_or_404(Subject, pk=self.kwargs['pk'])
+            if not subject.course in self.request.user.course_set.all():
                 raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-
-        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']), user=self.request.user)
+        serializer.save(subject=Subject.objects.get(pk=self.kwargs['pk']), user=self.request.user)
 
 
 class LikeCreate(generics.CreateAPIView):
