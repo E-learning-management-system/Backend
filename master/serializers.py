@@ -307,7 +307,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'author', 'course_id', 'course_title', 'subject_id', 'subject_title',
+        fields = ['id', 'title', 'description', 'teacher', 'course_id', 'course_title', 'subject_id', 'subject_title',
                   'date', 'deadline', 'file']
 
 
