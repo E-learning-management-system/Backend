@@ -48,7 +48,6 @@ class SubjectAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'course']
     list_filter = ['course']
     search_fields = ['title']
-    inlines = [PostInline]
 
 
 class LikeInline(admin.StackedInline):
