@@ -30,7 +30,7 @@ class CourseStudentAdmin(admin.ModelAdmin):
 
 class CourseAdmin(admin.ModelAdmin):
     ordering = ['start_date']
-    inlines = [SubjectInline, CourseStudentInline, PostInline, ExerciseInline]
+    inlines = [SubjectInline, CourseStudentInline, ExerciseInline]
     list_display = ['id', 'title', 'teacher', 'start_date', 'end_date', 'exam_date']
     list_filter = ['teacher', 'start_date', 'end_date', 'exam_date', 'student']
     search_fields = ['title', 'description']
@@ -47,7 +47,7 @@ class SubjectAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'course']
     list_filter = ['course']
     search_fields = ['title']
-
+    inlines = [PostInline]
 
 
 class LikeInline(admin.StackedInline):
