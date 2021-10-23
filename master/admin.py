@@ -70,8 +70,8 @@ class CommentAdmin(admin.ModelAdmin):
 
 class PostAdmin(admin.ModelAdmin):
     inlines = [CommentInline, LikeInline]
-    list_filter = ['poster', 'date']
-    list_display = ['id', 'poster', 'file', 'date']
+    list_filter = ['user', 'date']
+    list_display = ['id', 'user', 'file', 'date']
     search_fields = ['id']
 
 
@@ -85,8 +85,8 @@ class AnswerAdmin(admin.ModelAdmin):
 
 class ExerciseAdmin(admin.ModelAdmin):
     inlines = [AnswerInline]
-    list_display = ('title', 'course', 'subject', 'teacher', 'deadline')
-    list_filter = ('teacher', 'deadline', 'subject')
+    list_display = ('title', 'course', 'teacher', 'deadline')
+    list_filter = ('teacher', 'deadline')
 
 
 admin.site.register(Subject, SubjectAdmin)

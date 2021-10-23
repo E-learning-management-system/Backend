@@ -300,7 +300,7 @@ class PostCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
 
-        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']), poster=self.request.user)
+        serializer.save(course=Course.objects.get(pk=self.kwargs['pk']), user=self.request.user)
 
 
 class LikeCreate(generics.CreateAPIView):

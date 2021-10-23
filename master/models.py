@@ -159,13 +159,26 @@ class CourseStudent(models.Model):
         verbose_name_plural = 'دانشجویان'
 
 
+class Subject(models.Model):
+    title = models.CharField(verbose_name='عنوان', max_length=100)
+    course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'مبحث'
+        verbose_name_plural = 'مباحث'
+
+
 class Post(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, default=None)
-    poster = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
-                               on_delete=models.CASCADE)
-    subject = models.CharField(max_length=50, verbose_name='موضوع', null=True, blank=True, default=None)
-    text = models.TextField(verbose_name='متن')
+    subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, verbose_name='کاربر', blank=True, null=True, related_name='post_user',
+                             on_delete=models.CASCADE)
+    title = models.CharField(max_length=50, verbose_name='موضوع', null=True, blank=True, default=None)
+    description = models.TextField(verbose_name='متن')
     date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
     file = models.FileField(upload_to=post_image_directory_path, null=True, blank=True,
                             validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
@@ -207,18 +220,6 @@ class PostLike(models.Model):
         ordering = ['-date']
 
 
-class Subject(models.Model):
-    title = models.CharField(verbose_name='عنوان', max_length=100)
-    course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = 'مبحث'
-        verbose_name_plural = 'مباحث'
-
-
 class Exercise(models.Model):
     VALID_AVATAR_EXTENSION = ['png', 'jpg', 'jpeg']
     title = models.CharField(max_length=100, verbose_name='عنوان', unique=True)
@@ -227,7 +228,6 @@ class Exercise(models.Model):
     date = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', null=True)
     deadline = models.DateTimeField(verbose_name='مهلت تحویل', null=True)
     course = models.ForeignKey(Course, verbose_name='درس', on_delete=models.CASCADE, null=True)
-    subject = models.ForeignKey(Subject, verbose_name='مبحث', on_delete=models.CASCADE, null=True)
     file = models.FileField(upload_to=exercise_image_directory_path, null=True, blank=True,
                             validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
                             verbose_name='فایل',
