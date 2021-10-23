@@ -30,9 +30,6 @@ class Signup(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        user = User.objects.get(type=serializer.validated_data['type'],
-                                university=serializer.validated_data['university'],
-                                email=serializer.validated_data['email'])
         user1 = User.objects.filter(email=serializer.validated_data['email'])
         code = get_random_string(length=8, allowed_chars='1234567890')
         if user1:
@@ -344,13 +341,13 @@ class CommentCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         if self.request.user.type == 't':
-            post = Post.objects.get(pk=self.kwargs['pk'], course__teacher=self.request.user)
+            post = Post.objects.get(pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
             if post:
                 serializer.save(post=post, user=self.request.user)
             else:
                 raise ValidationError('شما به این عمل دسترسی ندارید')
         elif self.request.user.type == 's':
-            post = Post.objects.get(pk=self.kwargs['pk']).course.coursestudent_set.get(user=self.request.user)
+            post = Post.objects.get(pk=self.kwargs['pk']).subject.course.coursestudent_set.get(user=self.request.user)
             if post:
                 serializer.save(post=post, user=self.request.user)
             else:
@@ -374,7 +371,7 @@ class CommentDelete(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if self.request.user.type == 't':
-            comment = PostComment.objects.get(pk=self.kwargs['pk'], post__course__teacher=self.request.user)
+            comment = PostComment.objects.get(pk=self.kwargs['pk'], post__subject__course__teacher=self.request.user)
             if comment:
                 return self.destroy(self, request, *args, **kwargs)
             else:

@@ -207,12 +207,9 @@ class CourseSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         startdate = attrs.get('start_date')
         enddate = attrs.get('end_date')
-        examdate = attrs.get('exam_date')
 
         if startdate > enddate:
             raise serializers.ValidationError('تاریخ پایان باید بعد از تاریخ آغاز باشد.')
-        if examdate < startdate:
-            raise serializers.ValidationError('تاریخ امتحان باید بعد از تاریخ آغاز باشد.')
         return attrs
 
 
@@ -227,12 +224,9 @@ class CourseRUDSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         startdate = attrs.get('start_date')
         enddate = attrs.get('end_date')
-        examdate = attrs.get('exam_date')
 
         if startdate > enddate:
             raise serializers.ValidationError('تاریخ پایان باید بعد از تاریخ آغاز باشد.')
-        if examdate < startdate:
-            raise serializers.ValidationError('تاریخ امتحان باید بعد از تاریخ آغاز باشد.')
         return attrs
 
 
