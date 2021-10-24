@@ -417,11 +417,9 @@ class ExerciseCreate(generics.CreateAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        subject = Subject.objects.get(pk=self.kwargs['pk'])
-        course = subject.course
-
+        course = Course.objects.get(pk=self.kwargs['pk'])
         if course.teacher == self.request.user:
-            serializer.save(course=course, subject=subject, teacher=self.request.user)
+            serializer.save(course=course, teacher=self.request.user)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
@@ -453,7 +451,7 @@ class AnswerList(generics.ListAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'], author=self.request.user)
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'], user=self.request.user)
         if exercise:
             return Answer.objects.filter(exercise=exercise)
         else:
@@ -519,4 +517,4 @@ class TeacherExerciseList(generics.ListAPIView):
             raise ValidationError('فقط اساتید میتوانند تمارین خود را ببینند')
 
     def get_queryset(self):
-        return Exercise.objects.filter(author=self.request.user)
+        return Exercise.objects.filter(user=self.request.user)
