@@ -266,7 +266,7 @@ class PostList(generics.ListAPIView):
         if self.request.user.type == 't':
             return get_object_or_404(Subject, pk=self.kwargs['pk'], course__teacher=self.request.user).post_set.all()
         if self.request.user.type == 's':
-            return Post.objects.filter(Q(subject=get_object_or_404(Subject, pk=self.kwargs['pk'])) & Q(subject__course__in=[self.request.user.course_set.all()])).distinct()
+            return get_object_or_404(Subject, pk=self.kwargs['pk'], course__student__in=[self.request.user]).post_set.all()
 
 
 class PostRD(generics.RetrieveDestroyAPIView):
