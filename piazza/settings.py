@@ -86,9 +86,9 @@ DATABASES = {
 
     'default': {
         'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.mysql'),
-        'NAME': os.environ.get('SQL_DATABASE', 'soren_db'),
-        'USER': os.environ.get('SQL_USER', 'soren'),
-        'PASSWORD': os.environ.get('SQL_PASSWORD', 'soren_1234'),
+        'NAME': os.environ.get('SQL_DATABASE', 'piazza_db'),
+        'USER': os.environ.get('SQL_USER', 'piazza'),
+        'PASSWORD': os.environ.get('SQL_PASSWORD', 'piazza_1234'),
         'HOST': os.environ.get('SQL_HOST', 'localhost'),
     }
 }
