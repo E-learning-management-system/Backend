@@ -8,8 +8,11 @@ SECRET_KEY = 'django-insecure-j$y3y78*fsu4%!xn!n=@yq7y)qt7g8ar*9nez0s=py&cy(-*cp
 
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", '').split(
-    " ") if os.environ.get("DJANGO_ALLOWED_HOSTS", '') else []
+# A list of strings representing the host/domain names that this Django site can serve.
+ALLOWED_HOSTS = ['*']
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
     'master',
@@ -55,6 +58,7 @@ AUTHENTICATION_BACKENDS = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
