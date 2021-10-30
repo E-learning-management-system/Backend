@@ -72,10 +72,15 @@ class SigninSerializer(serializers.Serializer):
         email = attrs.get('email')
         password = attrs.get('password')
         if email and password:
+            user1 = User.objects.filter(email=email)
+            if user1:
+                user1=user1.first()
+                if user1.is_active is False:
+                    raise serializers.ValidationError('این اکانت غیرفعال است!', code='authorization')
             user = authenticate(request=self.context.get('request'),
                                 email=email, password=password)
             if not user:
-                raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
+                raise serializers.ValidationError('ایمیل یا رمز عبور اشتباه است!', code='authorization')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
 
