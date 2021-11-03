@@ -145,6 +145,43 @@ class DeleteAccount(generics.UpdateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class ChangeEmail(generics.CreateAPIView):
+    serializer_class = ChangeEmail
+    permissions_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(email=serializer.validated_data['old_email'])
+        code = get_random_string(length=8, allowed_chars='1234567890')
+        if user:
+            user = user.first()
+            user.code = code
+            user.save()
+        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        mail = '{0}'.format(str(serializer.validated_data['new_email']))
+        send_mail('سورن',
+                  data,
+                  'no-reply-khu@markop.ir',
+                  [mail])
+        email = serializer.validated_data['new_email']
+        return Response(email)
+
+
+class EmailVerification(generics.UpdateAPIView):
+    serializer_class = EmailVerification
+    model = User
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     model = User
@@ -266,7 +303,8 @@ class PostList(generics.ListAPIView):
         if self.request.user.type == 't':
             return get_object_or_404(Subject, pk=self.kwargs['pk'], course__teacher=self.request.user).post_set.all()
         if self.request.user.type == 's':
-            return get_object_or_404(Subject, pk=self.kwargs['pk'], course__student__in=[self.request.user]).post_set.all()
+            return get_object_or_404(Subject, pk=self.kwargs['pk'],
+                                     course__student__in=[self.request.user]).post_set.all()
 
 
 class PostRD(generics.RetrieveDestroyAPIView):
@@ -292,11 +330,11 @@ class PostCreate(generics.CreateAPIView):
                 raise ValidationError('شما به این عمل دسترسی ندارید')
         elif self.request.user.type == 's':
             subject = get_object_or_404(Subject, pk=self.kwargs['pk'])
-            if not subject.course in self.request.user.course_set.all():
+            if subject.course not in self.request.user.course_set.all():
                 raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def perform_create(self, serializer):
-        serializer.save(subject=Subject.objects.get(pk=self.kwargs['pk']), user=self.request.user)
+        serializer.save(subject=get_object_or_404(Subject, pk=self.kwargs['pk']), user=self.request.user)
 
 
 class LikeCreate(generics.CreateAPIView):
@@ -304,12 +342,10 @@ class LikeCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        post = Post.objects.get(pk=self.kwargs['pk'])
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
         like = PostLike.objects.filter(post=post, user=self.request.user)
         if like.exists():
             raise ValidationError('شما قبلا این پست را لایک کرده اید')
-        if not post:
-            raise ValidationError('نتیجه ای یافت نشد')
         else:
             serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
 
@@ -328,11 +364,7 @@ class LikeDestroy(generics.DestroyAPIView):
     queryset = PostLike.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        like = PostLike.objects.get(pk=self.kwargs['pk'], user=self.request.user)
-        if like:
-            return self.destroy(self, request, *args, **kwargs)
-        else:
-            raise ValidationError('شما به این عمل دسترسی ندارید')
+        like = get_object_or_404(PostLike, pk=self.kwargs['pk'], user=self.request.user)
 
 
 class CommentCreate(generics.CreateAPIView):
