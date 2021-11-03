@@ -17,6 +17,8 @@ urlpatterns = [
     path('forgotpassword/verification/changepassword/', ms.FPChangePassword.as_view(), name='FP_Change_Password'),
     path('profile/', ms.Profile.as_view(), name='Profile'),
     path('deleteaccount/', ms.DeleteAccount.as_view(), name='Delete_Account'),
+    path('changeemail/', ms.ChangeEmail.as_view(), name='Change_Email'),
+    path('changeemail/emailverification', ms.EmailVerification.as_view(), name='EmailVerification'),
     path('changepassword/', ms.ChangePassword.as_view(), name='Change_Password'),
     path('support/', ms.Support.as_view(), name='Support'),
 

@@ -145,6 +145,42 @@ class DeleteAccount(generics.UpdateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class ChangeEmail(generics.CreateAPIView):
+    serializer_class = ChangeEmail
+    permissions = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(email=serializer.validated_data['new_email'])
+        code = get_random_string(length=8, allowed_chars='1234567890')
+        if user:
+            user = user.first()
+            user.code = code
+            user.save()
+        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        mail = '{0}'.format(str(serializer.validated_data['email']))
+        send_mail('سورن',
+                  data,
+                  'no-reply-khu@markop.ir',
+                  [mail])
+        email = serializer.validated_data['new_email']
+        return Response(email)
+
+class EmailVerification(generics.UpdateAPIView):
+    serializer_class = EmailVerification
+    model = User
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if hasattr(user, 'auth_token'):
+            user.auth_token.delete()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     model = User

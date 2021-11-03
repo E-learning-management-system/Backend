@@ -89,6 +89,7 @@ class User(PermissionsMixin, AbstractBaseUser):
                               validators=[FileExtensionValidator(VALID_PHOTO_EXTENTION), validate_image_size],
                               upload_to=user_photo_directory_path, null=True,
                               blank=True)
+    last_login = models.DateTimeField(verbose_name="آخرین ورود", null=True, blank=True, auto_now_add=True)
     date_joined = models.DateTimeField(verbose_name="تاریخ عضویت", auto_now_add=True)
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
