@@ -145,11 +145,11 @@ class DeleteAccount(generics.UpdateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ChangeEmail(generics.CreateAPIView):
+class ChangeEmail(generics.UpdateAPIView):
     serializer_class = ChangeEmail
     permissions_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.filter(email=serializer.validated_data['old_email'])
@@ -181,6 +181,7 @@ class EmailVerification(generics.UpdateAPIView):
             user.auth_token.delete()
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key}, status=status.HTTP_200_OK)
+
 
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
