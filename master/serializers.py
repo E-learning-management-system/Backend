@@ -168,12 +168,14 @@ class DeleteAccountSerializer(serializers.Serializer):
 
 
 class ChangeEmail(serializers.Serializer):
-    new_email = serializers.EmailField(label='ایمیل', write_only=True)
+    old_email = serializers.EmailField(label='ایمیل قبلی', write_only=True)
+    new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
 
     def validate(self, attrs):
+        old_email = attrs.get('old_email')
         new_email = attrs.get('new_email')
         if new_email:
-            user = User.objects.filter(new_email=new_email)
+            user = User.objects.filter(email=new_email)
             if user:
                 raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
         else:
@@ -182,8 +184,8 @@ class ChangeEmail(serializers.Serializer):
 
 
 class EmailVerification(serializers.Serializer):
-    old_email = serializers.EmailField(label='ایمیل', write_only=True)
-    new_email = serializers.EmailField(label='ایمیل', write_only=True)
+    old_email = serializers.EmailField(label='ایمیل قبلی', write_only=True)
+    new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
     code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 

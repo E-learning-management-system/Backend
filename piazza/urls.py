@@ -18,7 +18,7 @@ urlpatterns = [
     path('profile/', ms.Profile.as_view(), name='Profile'),
     path('deleteaccount/', ms.DeleteAccount.as_view(), name='Delete_Account'),
     path('changeemail/', ms.ChangeEmail.as_view(), name='Change_Email'),
-    path('changeemail/emailverification', ms.EmailVerification.as_view(), name='EmailVerification'),
+    path('changeemail/emailverification/', ms.EmailVerification.as_view(), name='EmailVerification'),
     path('changepassword/', ms.ChangePassword.as_view(), name='Change_Password'),
     path('support/', ms.Support.as_view(), name='Support'),
 
