@@ -152,10 +152,9 @@ class ChangeEmail(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = User.objects.filter(email=serializer.validated_data['old_email'])
+        user = self.request.user
         code = get_random_string(length=8, allowed_chars='1234567890')
         if user:
-            user = user.first()
             user.code = code
             user.save()
         data = 'رمز یکبار مصرف : {0}'.format(str(code))
@@ -176,11 +175,8 @@ class EmailVerification(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        if hasattr(user, 'auth_token'):
-            user.auth_token.delete()
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class ChangePassword(generics.UpdateAPIView):
