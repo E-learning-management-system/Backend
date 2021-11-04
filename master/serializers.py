@@ -174,10 +174,13 @@ class ChangeEmail(serializers.Serializer):
     def validate(self, attrs):
         old_email = attrs.get('old_email')
         new_email = attrs.get('new_email')
-        if new_email:
-            user = User.objects.filter(email=new_email)
-            if user:
-                raise serializers.ValidationError('این ایمیل موجود است!', code='conflict')
+        if old_email and new_email:
+            user = User.objects.filter(email=old_email)
+            user1 = User.objects.filter(email=new_email)
+            if not user:
+                raise serializers.ValidationError('ایمیل قبلی موجود نیست!', code='conflict')
+            if user1:
+                raise serializers.ValidationError('ایمیل جدید از قبل موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
         return attrs
@@ -194,16 +197,19 @@ class EmailVerification(serializers.Serializer):
 
     def validate(self, attrs):
         old_email = attrs.get('old_email')
+        new_email = attrs.get('new_email')
         code = attrs.get('code')
         if old_email and code:
             user = User.objects.filter(email=old_email, code=code)
+            user1 = User.objects.filter(email=new_email)
             if user:
                 user = user.first()
             if not user:
                 raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
+            if user1:
+                raise serializers.ValidationError('ایمیل جدید از قبل موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
-
         attrs['user'] = user
         return attrs
 
