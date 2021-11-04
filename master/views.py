@@ -57,8 +57,7 @@ class SVerification(generics.UpdateAPIView):
             user.is_active = True
             user.save()
         token, create = Token.objects.get_or_create(user=user)
-        data = {'token': token.key}
-        return Response(data)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class Signin(generics.GenericAPIView):
@@ -70,8 +69,7 @@ class Signin(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, create = Token.objects.get_or_create(user=user)
-        data = {'token': token.key}
-        return Response(data)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class ForgotPassword(generics.CreateAPIView):
@@ -105,8 +103,7 @@ class Verification(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, create = Token.objects.get_or_create(user=user)
-        data = {'token': token.key}
-        return Response(data)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class FPChangePassword(generics.UpdateAPIView):
