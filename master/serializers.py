@@ -168,18 +168,16 @@ class DeleteAccountSerializer(serializers.Serializer):
 
 
 class ChangeEmail(serializers.Serializer):
-    old_email = serializers.EmailField(label='ایمیل قبلی', write_only=True)
     new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
 
+    class Meta:
+        model = User
+
     def validate(self, attrs):
-        old_email = attrs.get('old_email')
         new_email = attrs.get('new_email')
-        if old_email and new_email:
-            user = User.objects.filter(email=old_email)
-            user1 = User.objects.filter(email=new_email)
-            if not user:
-                raise serializers.ValidationError('ایمیل قبلی موجود نیست!', code='conflict')
-            if user1:
+        if new_email:
+            user = User.objects.filter(email=new_email)
+            if user:
                 raise serializers.ValidationError('ایمیل جدید از قبل موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
@@ -187,7 +185,6 @@ class ChangeEmail(serializers.Serializer):
 
 
 class EmailVerification(serializers.Serializer):
-    old_email = serializers.EmailField(label='ایمیل قبلی', write_only=True)
     new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
     code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
@@ -196,21 +193,18 @@ class EmailVerification(serializers.Serializer):
         model = User
 
     def validate(self, attrs):
-        old_email = attrs.get('old_email')
         new_email = attrs.get('new_email')
         code = attrs.get('code')
-        if old_email and code:
-            user = User.objects.filter(email=old_email, code=code)
+        if new_email and code:
+            user = self.context['request'].user
             user1 = User.objects.filter(email=new_email)
-            if user:
-                user = user.first()
-            if not user:
+            code1 = '{0}'.format(str(user.code))
+            if code != code1:
                 raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
             if user1:
                 raise serializers.ValidationError('ایمیل جدید از قبل موجود است!', code='conflict')
         else:
             raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
-        attrs['user'] = user
         return attrs
 
     def save(self, **kwargs):
