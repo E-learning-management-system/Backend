@@ -7,10 +7,12 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField(label='تاریخ عضویت')
     last_login = serializers.ReadOnlyField(label='آخرین ورود')
     email = serializers.ReadOnlyField(label='ایمیل')
+    type = serializers.ReadOnlyField(label='نقش')
+    university = serializers.ReadOnlyField(label='دانشگاه')
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'university', 'type', 'name',
+        fields = ['id', 'email', 'university', 'type', 'name',
                   'bio', 'photo', 'date_joined', 'last_login']
 
 
@@ -62,7 +64,7 @@ class SignupSerializer(serializers.Serializer):
 
 
 class SigninSerializer(serializers.Serializer):
-    email = serializers.CharField(label='ایمیل', write_only=True)
+    email = serializers.EmailField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
 
@@ -75,7 +77,7 @@ class SigninSerializer(serializers.Serializer):
         if email and password:
             user1 = User.objects.filter(email=email)
             if user1:
-                user1=user1.first()
+                user1 = user1.first()
                 if user1.is_active is False:
                     raise serializers.ValidationError('این اکانت غیرفعال است!', code='authorization')
             user = authenticate(request=self.context.get('request'),
@@ -218,7 +220,7 @@ class EmailVerification(serializers.Serializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(label='رمز عبور قبلی', max_length=128, required=True,
                                          write_only=True)
-    new_password = serializers.CharField(label='رمز عبور حدید', max_length=128, required=True,
+    new_password = serializers.CharField(label='رمز عبور جدید', max_length=128, required=True,
                                          write_only=True)
     new_password_confirmation = serializers.CharField(label='تکرار رمز عبور جدید', max_length=128,
                                                       required=True, write_only=True)
@@ -230,6 +232,8 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
+        if data['new_password'] == data['old_password']:
+            raise serializers.ValidationError('رمز عبور قبلی و جدید یکسان است!', code='conflict')
         if data['new_password'] != data['new_password_confirmation']:
             raise serializers.ValidationError('رمز عبور با تکرارش یکسان نیست!', code='conflict')
         password_validation.validate_password(data['new_password'], self.context['request'].user)

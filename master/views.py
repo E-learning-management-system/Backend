@@ -108,7 +108,6 @@ class Verification(generics.UpdateAPIView):
 
 class FPChangePassword(generics.UpdateAPIView):
     serializer_class = FPChangePasswordSerializer
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -166,7 +165,6 @@ class ChangeEmail(generics.UpdateAPIView):
 
 class EmailVerification(generics.UpdateAPIView):
     serializer_class = EmailVerification
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -178,7 +176,6 @@ class EmailVerification(generics.UpdateAPIView):
 
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
