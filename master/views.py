@@ -49,7 +49,7 @@ class Signup(generics.CreateAPIView):
 class SVerification(generics.UpdateAPIView):
     serializer_class = Verification
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -98,7 +98,7 @@ class ForgotPassword(generics.CreateAPIView):
 class Verification(generics.UpdateAPIView):
     serializer_class = Verification
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -108,7 +108,6 @@ class Verification(generics.UpdateAPIView):
 
 class FPChangePassword(generics.UpdateAPIView):
     serializer_class = FPChangePasswordSerializer
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -166,7 +165,6 @@ class ChangeEmail(generics.UpdateAPIView):
 
 class EmailVerification(generics.UpdateAPIView):
     serializer_class = EmailVerification
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -178,7 +176,6 @@ class EmailVerification(generics.UpdateAPIView):
 
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
-    model = User
     permission_classes = [permissions.IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
