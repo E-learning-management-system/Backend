@@ -1,3 +1,4 @@
+from django.contrib.auth.models import update_last_login
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils.crypto import get_random_string
@@ -66,6 +67,7 @@ class Signin(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        update_last_login(None, user)
         token, create = Token.objects.get_or_create(user=user)
         return Response({'token': token.key}, status=status.HTTP_200_OK)
 
