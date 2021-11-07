@@ -28,7 +28,6 @@ class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', max_length=128, write_only=True)
     password_confirmation = serializers.CharField(label='تکرار رمز عبور', max_length=128, write_only=True)
-    token = serializers.CharField(label='توکن', read_only=True)
 
     def validate(self, attrs):
         type = attrs.get('type')
@@ -50,7 +49,6 @@ class SignupSerializer(serializers.Serializer):
             password_validation.validate_password(attrs['password'], self.context['request'].user)
         else:
             raise serializers.ValidationError('اطلاعات را به درستی وارد کنید!', code='authorization')
-
         return attrs
 
     def create(self, validated_data):
@@ -67,9 +65,6 @@ class SigninSerializer(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
     password = serializers.CharField(label='رمز عبور', write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
-
-    class Meta:
-        model = User
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -104,8 +99,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
                 raise serializers.ValidationError('کاربری با این اطلاعات موجود نیست!', code='authorization')
         else:
             raise serializers.ValidationError('ایمیل نمی تواند خالی باشد!', code='authorization')
-
-        attrs['email'] = user.email
         return attrs
 
 
@@ -113,9 +106,6 @@ class Verification(serializers.Serializer):
     email = serializers.EmailField(label='ایمیل', write_only=True)
     code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
     token = serializers.CharField(label='توکن', read_only=True)
-
-    class Meta:
-        model = User
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -128,7 +118,6 @@ class Verification(serializers.Serializer):
                 raise serializers.ValidationError('کد وارد شده صحیح نیست!', code='authorization')
         else:
             raise serializers.ValidationError('این فیلد نمی تواند خالی باشد!', code='authorization')
-
         attrs['user'] = user
         return attrs
 
@@ -172,9 +161,6 @@ class DeleteAccountSerializer(serializers.Serializer):
 class ChangeEmail(serializers.Serializer):
     new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
 
-    class Meta:
-        model = User
-
     def validate(self, attrs):
         new_email = attrs.get('new_email')
         if new_email:
@@ -189,10 +175,6 @@ class ChangeEmail(serializers.Serializer):
 class EmailVerification(serializers.Serializer):
     new_email = serializers.EmailField(label='ایمیل جدید', write_only=True)
     code = serializers.CharField(label='کد یکبار مصرف', min_length=8, write_only=True)
-    token = serializers.CharField(label='توکن', read_only=True)
-
-    class Meta:
-        model = User
 
     def validate(self, attrs):
         new_email = attrs.get('new_email')

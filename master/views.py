@@ -13,7 +13,6 @@ from rest_framework.generics import get_object_or_404
 
 class Signup(generics.CreateAPIView):
     serializer_class = SignupSerializer
-    permission_classes = [permissions.AllowAny]
 
     @extend_schema(
         summary='Create a new user',
@@ -62,7 +61,6 @@ class SVerification(generics.UpdateAPIView):
 
 class Signin(generics.GenericAPIView):
     serializer_class = SigninSerializer
-    permissions = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -74,7 +72,6 @@ class Signin(generics.GenericAPIView):
 
 class ForgotPassword(generics.CreateAPIView):
     serializer_class = ForgotPasswordSerializer
-    permissions = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -190,7 +187,6 @@ class ChangePassword(generics.UpdateAPIView):
 
 class Support(generics.CreateAPIView):
     serializer_class = Support
-    permissions = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
