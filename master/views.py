@@ -1,6 +1,7 @@
 from django.contrib.auth.models import update_last_login
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
@@ -330,15 +331,19 @@ class SavedPostsListCreate(generics.ListCreateAPIView):
     serializer_class = SavePostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
+    def post(self, request, *args, **kwargs):
         if self.request.user.type == 't':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
             post.savedby.add(self.request.user)
+            return HttpResponse('ذخیره شد', status=201)
         elif self.request.user.type == 's':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
                 get_object_or_404(CourseStudent, user=self.request.user,
                                   course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
             post.savedby.add(self.request.user)
+            return HttpResponse('دخیره شد', status=201)
+        else:
+            raise PermissionError('Access denied')
 
     def get_queryset(self):
         return self.request.user.post_set.all()
