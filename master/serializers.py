@@ -321,7 +321,6 @@ class SavePostSerializer(serializers.Serializer):
     likes = serializers.SerializerMethodField()
     description = serializers.ReadOnlyField()
     title = serializers.ReadOnlyField()
-    file = serializers.ReadOnlyField()
     course_id = serializers.ReadOnlyField(source='subject.course.id')
     course_title = serializers.ReadOnlyField(source='subject.course.title')
     subject_id = serializers.ReadOnlyField(source='subject.id')
@@ -333,7 +332,7 @@ class SavePostSerializer(serializers.Serializer):
     class Meta:
         model = Post
         fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
-                  'subject_id', 'subject_title', 'description', 'date', 'file', 'comments', 'likes']
+                  'subject_id', 'subject_title', 'description', 'date',  'comments', 'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()

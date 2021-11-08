@@ -180,7 +180,7 @@ class Post(models.Model):
     title = models.CharField(max_length=50, verbose_name='موضوع', null=True, blank=True, default=None)
     description = models.TextField(verbose_name='متن')
     date = models.DateTimeField(verbose_name='تاریخ', auto_now_add=True, null=True)
-    file = models.FileField(upload_to=post_image_directory_path, null=True, blank=True,
+    file = models.FileField(upload_to=post_image_directory_path,default=None, null=True, blank=True,
                             validators=[FileExtensionValidator(VALID_AVATAR_EXTENSION), validate_image_size],
                             verbose_name='فایل',
 

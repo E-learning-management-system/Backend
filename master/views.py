@@ -333,12 +333,12 @@ class SavedPostsListCreate(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if self.request.user.type == 't':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
-            post.savedby.create(self.request.user)
+            post.savedby.add(self.request.user)
         elif self.request.user.type == 's':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
                 get_object_or_404(CourseStudent, user=self.request.user,
                                   course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
-            post.savedby.create(self.request.user)
+            post.savedby.add(self.request.user)
 
     def get_queryset(self):
         return self.request.user.post_set.all()
