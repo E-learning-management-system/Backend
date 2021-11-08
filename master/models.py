@@ -187,6 +187,7 @@ class Post(models.Model):
                             help_text='Image size should be less than {0}'.format(
                                 filesizeformat(settings.MAX_UPLOAD_IMAGE_SIZE))
                             )
+    savedby = models.ManyToManyField(User, verbose_name='ذخیره شده توسط: ', blank=True)
 
     def __str__(self):
         return str(self.id)

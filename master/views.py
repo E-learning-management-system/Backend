@@ -326,17 +326,32 @@ class PostCreate(generics.CreateAPIView):
         serializer.save(subject=get_object_or_404(Subject, pk=self.kwargs['pk']), user=self.request.user)
 
 
+class SavedPostsListCreate(generics.ListCreateAPIView):
+    serializer_class = SavePostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if self.request.user.type == 't':
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
+            post.savedby.create(self.request.user)
+        elif self.request.user.type == 's':
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
+                get_object_or_404(CourseStudent, user=self.request.user,
+                                  course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
+            post.savedby.create(self.request.user)
+
+    def get_queryset(self):
+        return self.request.user.post_set.all()
+
+
 class LikeCreate(generics.CreateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        like = PostLike.objects.filter(post=post, user=self.request.user)
-        if like.exists():
-            raise ValidationError('شما قبلا این پست را لایک کرده اید')
-        else:
-            serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
+        like = get_object_or_404(PostLike, user=self.request.user, post=post)
+        serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
 
 
 class LikeList(generics.ListAPIView):
@@ -362,11 +377,8 @@ class CommentCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         if self.request.user.type == 't':
-            post = Post.objects.get(pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
-            if post:
-                serializer.save(post=post, user=self.request.user)
-            else:
-                raise ValidationError('شما به این عمل دسترسی ندارید')
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
+            serializer.save(post=post, user=self.request.user)
         elif self.request.user.type == 's':
             post = Post.objects.get(pk=self.kwargs['pk']).subject.course.coursestudent_set.get(user=self.request.user)
             if post:
