@@ -129,7 +129,7 @@ class Profile(generics.RetrieveUpdateAPIView):
 
 
 class UserProfile(generics.RetrieveAPIView):
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
 
     def get_object(self):

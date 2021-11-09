@@ -16,6 +16,13 @@ class UserSerializer(serializers.ModelSerializer):
                   'bio', 'photo', 'date_joined', 'last_login']
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['email', 'university', 'name', 'bio', 'photo', 'date_joined', 'last_login']
+
+
 TYPE_CHOICES = [
     ('t', 'استاد'),
     ('s', 'دانشجو'),
