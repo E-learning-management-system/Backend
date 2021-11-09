@@ -1,5 +1,7 @@
+from django.contrib.auth.models import update_last_login
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
@@ -29,14 +31,14 @@ class Signup(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        user1 = User.objects.filter(email=serializer.validated_data['email'])
+        user = User.objects.filter(email=serializer.validated_data['email'])
         code = get_random_string(length=8, allowed_chars='1234567890')
-        if user1:
-            user1 = user1.first()
-            user1.code = code
-            user1.save()
+        if user:
+            user = user.first()
+            user.code = code
+            user.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
-        data = 'به سورن خوش آمدید\nرمز یکبار مصرف : {0}'.format(str(code))
+        data = 'به سورن خوش آمدید\n\nسورن سامانه هدفمند یادگیری الکترونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         send_mail('سورن',
                   data,
                   'no-reply-khu@markop.ir',
@@ -47,6 +49,7 @@ class Signup(generics.CreateAPIView):
 
 class SVerification(generics.UpdateAPIView):
     serializer_class = Verification
+    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -61,17 +64,20 @@ class SVerification(generics.UpdateAPIView):
 
 class Signin(generics.GenericAPIView):
     serializer_class = SigninSerializer
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        update_last_login(None, user)
         token, create = Token.objects.get_or_create(user=user)
         return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class ForgotPassword(generics.CreateAPIView):
     serializer_class = ForgotPasswordSerializer
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -82,7 +88,7 @@ class ForgotPassword(generics.CreateAPIView):
             user = user.first()
             user.code = code
             user.save()
-        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
@@ -94,6 +100,7 @@ class ForgotPassword(generics.CreateAPIView):
 
 class Verification(generics.UpdateAPIView):
     serializer_class = Verification
+    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -106,6 +113,7 @@ class Verification(generics.UpdateAPIView):
 class FPChangePassword(generics.UpdateAPIView):
     serializer_class = FPChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -125,9 +133,18 @@ class Profile(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class UserProfile(generics.RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    queryset = User.objects.all()
+
+    def get_object(self):
+        return get_object_or_404(User, email=self.kwargs['email'])
+
+
 class DeleteAccount(generics.UpdateAPIView):
     serializer_class = DeleteAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -140,7 +157,8 @@ class DeleteAccount(generics.UpdateAPIView):
 
 class ChangeEmail(generics.UpdateAPIView):
     serializer_class = ChangeEmail
-    permissions_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -150,7 +168,7 @@ class ChangeEmail(generics.UpdateAPIView):
         if user:
             user.code = code
             user.save()
-        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         mail = '{0}'.format(str(serializer.validated_data['new_email']))
         send_mail('سورن',
                   data,
@@ -163,6 +181,7 @@ class ChangeEmail(generics.UpdateAPIView):
 class EmailVerification(generics.UpdateAPIView):
     serializer_class = EmailVerification
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -174,6 +193,7 @@ class EmailVerification(generics.UpdateAPIView):
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -187,6 +207,7 @@ class ChangePassword(generics.UpdateAPIView):
 
 class Support(generics.CreateAPIView):
     serializer_class = Support
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -324,17 +345,36 @@ class PostCreate(generics.CreateAPIView):
         serializer.save(subject=get_object_or_404(Subject, pk=self.kwargs['pk']), user=self.request.user)
 
 
+class SavedPostsListCreate(generics.ListCreateAPIView):
+    serializer_class = SavePostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.type == 't':
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
+            post.savedby.add(self.request.user)
+            return HttpResponse('ذخیره شد', status=201)
+        elif self.request.user.type == 's':
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
+                get_object_or_404(CourseStudent, user=self.request.user,
+                                  course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
+            post.savedby.add(self.request.user)
+            return HttpResponse('دخیره شد', status=201)
+        else:
+            raise PermissionError('Access denied')
+
+    def get_queryset(self):
+        return self.request.user.post_set.all()
+
+
 class LikeCreate(generics.CreateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        like = PostLike.objects.filter(post=post, user=self.request.user)
-        if like.exists():
-            raise ValidationError('شما قبلا این پست را لایک کرده اید')
-        else:
-            serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
+        like = get_object_or_404(PostLike, user=self.request.user, post=post)
+        serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
 
 
 class LikeList(generics.ListAPIView):
@@ -360,11 +400,8 @@ class CommentCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         if self.request.user.type == 't':
-            post = Post.objects.get(pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
-            if post:
-                serializer.save(post=post, user=self.request.user)
-            else:
-                raise ValidationError('شما به این عمل دسترسی ندارید')
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
+            serializer.save(post=post, user=self.request.user)
         elif self.request.user.type == 's':
             post = Post.objects.get(pk=self.kwargs['pk']).subject.course.coursestudent_set.get(user=self.request.user)
             if post:

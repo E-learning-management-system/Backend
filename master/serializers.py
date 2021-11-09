@@ -16,6 +16,13 @@ class UserSerializer(serializers.ModelSerializer):
                   'bio', 'photo', 'date_joined', 'last_login']
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['email', 'university', 'name', 'bio', 'photo', 'date_joined', 'last_login']
+
+
 TYPE_CHOICES = [
     ('t', 'استاد'),
     ('s', 'دانشجو'),
@@ -123,7 +130,7 @@ class Verification(serializers.Serializer):
 
 
 class FPChangePasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField(label='رمز عبور حدید', max_length=128, required=True,
+    new_password = serializers.CharField(label='رمز عبور جدید', max_length=128, required=True,
                                          write_only=True)
     new_password_confirmation = serializers.CharField(label='تکرار رمز عبور جدید', max_length=128,
                                                       required=True, write_only=True)
@@ -308,6 +315,31 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
                   'subject_id', 'subject_title', 'description', 'date', 'file', 'comments', 'likes']
+
+    def get_likes(self, post):
+        return PostLike.objects.filter(post=post).count()
+
+    def get_comments(self, post):
+        return PostComment.objects.filter(post=post).count()
+
+
+class SavePostSerializer(serializers.Serializer):
+    comments = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+    description = serializers.ReadOnlyField()
+    title = serializers.ReadOnlyField()
+    course_id = serializers.ReadOnlyField(source='subject.course.id')
+    course_title = serializers.ReadOnlyField(source='subject.course.title')
+    subject_id = serializers.ReadOnlyField(source='subject.id')
+    subject_title = serializers.ReadOnlyField(source='subject.id')
+    course_teacher = serializers.ReadOnlyField(source='subject.course.teacher.email')
+    user_id = serializers.ReadOnlyField(source='user.id')
+    user_email = serializers.ReadOnlyField(source='user.email')
+
+    class Meta:
+        model = Post
+        fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
+                  'subject_id', 'subject_title', 'description', 'date',  'comments', 'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
