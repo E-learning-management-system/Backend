@@ -123,7 +123,7 @@ class Verification(serializers.Serializer):
 
 
 class FPChangePasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField(label='رمز عبور حدید', max_length=128, required=True,
+    new_password = serializers.CharField(label='رمز عبور جدید', max_length=128, required=True,
                                          write_only=True)
     new_password_confirmation = serializers.CharField(label='تکرار رمز عبور جدید', max_length=128,
                                                       required=True, write_only=True)
