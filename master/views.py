@@ -128,6 +128,14 @@ class Profile(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class UserProfile(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    def get_object(self):
+        return get_object_or_404(User, email=self.kwargs['email'])
+
+
 class DeleteAccount(generics.UpdateAPIView):
     serializer_class = DeleteAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
