@@ -49,7 +49,6 @@ class Signup(generics.CreateAPIView):
 
 class SVerification(generics.UpdateAPIView):
     serializer_class = Verification
-    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -64,7 +63,6 @@ class SVerification(generics.UpdateAPIView):
 
 class Signin(generics.GenericAPIView):
     serializer_class = SigninSerializer
-    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -77,7 +75,6 @@ class Signin(generics.GenericAPIView):
 
 class ForgotPassword(generics.CreateAPIView):
     serializer_class = ForgotPasswordSerializer
-    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -100,7 +97,6 @@ class ForgotPassword(generics.CreateAPIView):
 
 class Verification(generics.UpdateAPIView):
     serializer_class = Verification
-    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -113,7 +109,6 @@ class Verification(generics.UpdateAPIView):
 class FPChangePassword(generics.UpdateAPIView):
     serializer_class = FPChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -144,7 +139,6 @@ class UserProfile(generics.RetrieveAPIView):
 class DeleteAccount(generics.UpdateAPIView):
     serializer_class = DeleteAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -158,7 +152,6 @@ class DeleteAccount(generics.UpdateAPIView):
 class ChangeEmail(generics.UpdateAPIView):
     serializer_class = ChangeEmail
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -181,7 +174,6 @@ class ChangeEmail(generics.UpdateAPIView):
 class EmailVerification(generics.UpdateAPIView):
     serializer_class = EmailVerification
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -193,7 +185,6 @@ class EmailVerification(generics.UpdateAPIView):
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
-    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -207,7 +198,6 @@ class ChangePassword(generics.UpdateAPIView):
 
 class Support(generics.CreateAPIView):
     serializer_class = Support
-    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
