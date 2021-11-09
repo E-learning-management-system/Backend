@@ -31,14 +31,14 @@ class Signup(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        user1 = User.objects.filter(email=serializer.validated_data['email'])
+        user = User.objects.filter(email=serializer.validated_data['email'])
         code = get_random_string(length=8, allowed_chars='1234567890')
-        if user1:
-            user1 = user1.first()
-            user1.code = code
-            user1.save()
+        if user:
+            user = user.first()
+            user.code = code
+            user.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
-        data = 'به سورن خوش آمدید\nرمز یکبار مصرف : {0}'.format(str(code))
+        data = 'به سورن خوش آمدید\n\nسورن سامانه هدفمند یادگیری الکترونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         send_mail('سورن',
                   data,
                   'no-reply-khu@markop.ir',
@@ -49,6 +49,7 @@ class Signup(generics.CreateAPIView):
 
 class SVerification(generics.UpdateAPIView):
     serializer_class = Verification
+    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -63,6 +64,7 @@ class SVerification(generics.UpdateAPIView):
 
 class Signin(generics.GenericAPIView):
     serializer_class = SigninSerializer
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -75,6 +77,7 @@ class Signin(generics.GenericAPIView):
 
 class ForgotPassword(generics.CreateAPIView):
     serializer_class = ForgotPasswordSerializer
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -85,7 +88,7 @@ class ForgotPassword(generics.CreateAPIView):
             user = user.first()
             user.code = code
             user.save()
-        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
                   data,
@@ -97,6 +100,7 @@ class ForgotPassword(generics.CreateAPIView):
 
 class Verification(generics.UpdateAPIView):
     serializer_class = Verification
+    allowed_methods = ('put',)
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -109,6 +113,7 @@ class Verification(generics.UpdateAPIView):
 class FPChangePassword(generics.UpdateAPIView):
     serializer_class = FPChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -139,6 +144,7 @@ class UserProfile(generics.RetrieveAPIView):
 class DeleteAccount(generics.UpdateAPIView):
     serializer_class = DeleteAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -151,7 +157,8 @@ class DeleteAccount(generics.UpdateAPIView):
 
 class ChangeEmail(generics.UpdateAPIView):
     serializer_class = ChangeEmail
-    permissions_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -161,7 +168,7 @@ class ChangeEmail(generics.UpdateAPIView):
         if user:
             user.code = code
             user.save()
-        data = 'رمز یکبار مصرف : {0}'.format(str(code))
+        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         mail = '{0}'.format(str(serializer.validated_data['new_email']))
         send_mail('سورن',
                   data,
@@ -174,6 +181,7 @@ class ChangeEmail(generics.UpdateAPIView):
 class EmailVerification(generics.UpdateAPIView):
     serializer_class = EmailVerification
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -185,6 +193,7 @@ class EmailVerification(generics.UpdateAPIView):
 class ChangePassword(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
+    allowed_methods = ('put',)
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -198,6 +207,7 @@ class ChangePassword(generics.UpdateAPIView):
 
 class Support(generics.CreateAPIView):
     serializer_class = Support
+    allowed_methods = ('post',)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
