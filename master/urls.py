@@ -4,6 +4,7 @@ from master import views as ms
 urlpatterns = [
     path('savepost/<int:pk>/', ms.SavedPostsListCreate.as_view()),
     path('savedposts/', ms.SavedPostsListCreate.as_view()),
+    path('unsavepost/<int:pk>/', ms.RemoveSavedPosts.as_view()),
     path('courses/', ms.CourseList.as_view()),
     path('newcourse/', ms.CourseCreate.as_view()),
     path('course-rud/<int:pk>/', ms.CourseRUD.as_view()),
