@@ -206,6 +206,7 @@ class Support(generics.CreateAPIView):
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    search_fields = ['=title']
 
     def get_queryset(self):
         return Course.objects.filter(Q(teacher=self.request.user) | Q(student__in=[self.request.user])).distinct()
@@ -236,6 +237,7 @@ class CourseRUD(generics.RetrieveUpdateDestroyAPIView):
 class CourseStudentList(generics.ListAPIView):
     serializer_class = CourseStudentSerializer
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
+    search_fields = ['=user__name']
 
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user)
@@ -254,7 +256,8 @@ class CourseStudentCreate(generics.CreateAPIView):
             raise ValidationError('این دانشجو قبلا اضافه شده است')
         if not user.exists():
             mail = '{0}'.format(self.kwargs['email'])
-            data = 'با سلام شما در درس {0} استاد {1} عضو هستید اما در سامانه سورن ثبت نام نکرده اید.'.format(course.title, course.teacher.name)
+            data = 'با سلام شما در درس {0} استاد {1} عضو هستید اما در سامانه سورن ثبت نام نکرده اید.'.format(
+                course.title, course.teacher.name)
             send_mail('سورن',
                       data,
                       'no-reply-khu@markop.ir',
@@ -286,6 +289,7 @@ class SubjectCreate(generics.CreateAPIView):
 class SubjectList(generics.ListAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
+    search_fields = ['=title']
 
     def get_queryset(self):
         if self.request.user.type == 't':
