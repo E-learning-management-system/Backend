@@ -250,10 +250,6 @@ class CourseStudentCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
         user = User.objects.filter(email=self.kwargs['email'])
-        if user.first().type == 't':
-            raise ValidationError('ایمیل وارد شده باید متعلق به یک دانشجو باشد')
-        if CourseStudent.objects.filter(course=course, user=user.first()).exists():
-            raise ValidationError('این دانشجو قبلا اضافه شده است')
         if not user.exists():
             mail = '{0}'.format(self.kwargs['email'])
             data = 'با سلام شما در درس {0} استاد {1} عضو هستید اما در سامانه سورن ثبت نام نکرده اید.'.format(
@@ -263,6 +259,10 @@ class CourseStudentCreate(generics.CreateAPIView):
                       'no-reply-khu@markop.ir',
                       [mail])
             raise ValidationError('کاربر موجود نیست. از طریق ایمیل به ایشان اطلاع داده خواهد شد')
+        if user.first().type == 't':
+            raise ValidationError('ایمیل وارد شده باید متعلق به یک دانشجو باشد')
+        if CourseStudent.objects.filter(course=course, user=user.first()).exists():
+            raise ValidationError('این دانشجو قبلا اضافه شده است')
 
         serializer.save(course=course, user=user.first())
 
