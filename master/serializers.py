@@ -262,7 +262,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class CourseRUDSerializer(serializers.ModelSerializer):
     teacher = serializers.ReadOnlyField(source='teacher.email')
-    course_title = serializers.ReadOnlyField(source='course.title')
+    course_title = serializers.ReadOnlyField(source='title')
 
     class Meta:
         model = Course
