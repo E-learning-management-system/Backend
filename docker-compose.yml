@@ -18,6 +18,7 @@ services:
       - /srv/piazza-api/media:/app/media
       - /srv/piazza-api/static:/app/static
 
+
 networks:
   mysql-network:
     external: true
