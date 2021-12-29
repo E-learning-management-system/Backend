@@ -409,8 +409,11 @@ class LikeCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        like = get_object_or_404(PostLike, user=self.request.user, post=post)
-        serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
+        like = PostLike.objects.filter(user=self.request.user, post=post).first()
+        if like.exists():
+            raise ValidationError('شما قبلا این پست را لایک کرده اید')
+        else:
+            serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
 
 
 class LikeList(generics.ListAPIView):
