@@ -341,7 +341,7 @@ class PostSerializer(serializers.ModelSerializer):
         return PostComment.objects.filter(post=post).count()
 
 
-class SavePostSerializer(serializers.Serializer):
+class SavePostSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
     description = serializers.ReadOnlyField()
@@ -353,11 +353,28 @@ class SavePostSerializer(serializers.Serializer):
     course_teacher = serializers.ReadOnlyField(source='subject.course.teacher.email')
     user_id = serializers.ReadOnlyField(source='user.id')
     user_email = serializers.ReadOnlyField(source='user.email')
+    is_liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
+        fields = ['id', 'user_id', 'user_email', 'is_liked', 'is_saved', 'course_teacher', 'course_id', 'course_title',
+                  'title',
                   'subject_id', 'subject_title', 'description', 'date', 'comments', 'likes']
+
+    def get_is_saved(self, post):
+        if self.context.get('request').user in post.savedby.all():
+            return 'True'
+        else:
+            return 'False'
+
+    def get_is_liked(self, post):
+        like = PostLike.objects.filter(user__email=self.context.get('request').user.email,
+                                       post=post)
+        if like.exists():
+            return 'True'
+        else:
+            return 'False'
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()

@@ -386,7 +386,7 @@ class RemoveSavedPosts(generics.ListCreateAPIView):
                 post.savedby.remove(self.request.user)
                 return HttpResponse('از حالت ذخیره خارج شد', status=201)
             except:
-                return HttpResponse('شما این پست را ذحیره نکرده اید')
+                return HttpResponse('شما این پست را ذحیره نکرده اید',status=400)
         elif self.request.user.type == 's':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
                 get_object_or_404(CourseStudent, user=self.request.user,
