@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+
 from .models import *
 
 
@@ -17,7 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ['email', 'university', 'name', 'bio', 'photo', 'date_joined', 'last_login']
@@ -310,11 +311,28 @@ class PostSerializer(serializers.ModelSerializer):
     course_teacher = serializers.ReadOnlyField(source='subject.course.teacher.email')
     user_id = serializers.ReadOnlyField(source='user.id')
     user_email = serializers.ReadOnlyField(source='user.email')
+    is_liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
-                  'subject_id', 'subject_title', 'description', 'date', 'file', 'comments', 'likes']
+                  'subject_id', 'is_liked', 'is_saved', 'subject_title', 'description', 'date', 'file', 'comments',
+                  'likes']
+
+    def get_is_saved(self, post):
+        if self.context.get('request').user in post.savedby.all():
+            return 'True'
+        else:
+            return 'False'
+
+    def get_is_liked(self, post):
+        like = PostLike.objects.filter(user__email=self.context.get('request').user.email,
+                                       post=post)
+        if like.exists():
+            return 'True'
+        else:
+            return 'False'
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
@@ -339,7 +357,7 @@ class SavePostSerializer(serializers.Serializer):
     class Meta:
         model = Post
         fields = ['id', 'user_id', 'user_email', 'course_teacher', 'course_id', 'course_title', 'title',
-                  'subject_id', 'subject_title', 'description', 'date',  'comments', 'likes']
+                  'subject_id', 'subject_title', 'description', 'date', 'comments', 'likes']
 
     def get_likes(self, post):
         return PostLike.objects.filter(post=post).count()
