@@ -366,7 +366,7 @@ class SavedPostsListCreate(generics.ListCreateAPIView):
                 get_object_or_404(CourseStudent, user=self.request.user,
                                   course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
             post.savedby.add(self.request.user)
-            return HttpResponse('دخیره شد', status=201)
+            return HttpResponse('ذخیره شد', status=201)
         else:
             raise PermissionError('Access denied')
 
@@ -442,9 +442,9 @@ class CommentCreate(generics.CreateAPIView):
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
             serializer.save(post=post, user=self.request.user)
         elif self.request.user.type == 's':
-            post = get_object_or_404(Post, pk=self.kwargs['pk']).subject.course.coursestudent_set.get(
+            post_auth = get_object_or_404(Post, pk=self.kwargs['pk']).subject.course.coursestudent_set.get(
                 user=self.request.user)
-            serializer.save(post=post, user=self.request.user)
+            serializer.save(post=get_object_or_404(Post, pk=self.kwargs['pk']), user=self.request.user)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
