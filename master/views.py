@@ -328,7 +328,7 @@ class PostRD(generics.RetrieveDestroyAPIView):
     queryset = Post.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        post = Post.objects.filter(pk=kwargs['pk'], poster=self.request.user)
+        post = Post.objects.filter(pk=kwargs['pk'], user=self.request.user)
         if post.exists():
             return self.destroy(request, *args, **kwargs)
         else:
@@ -431,6 +431,7 @@ class LikeDestroy(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         like = get_object_or_404(PostLike, pk=self.kwargs['pk'], user=self.request.user)
+        return self.destroy(request, *args, **kwargs)
 
 
 class CommentCreate(generics.CreateAPIView):
