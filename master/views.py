@@ -430,8 +430,8 @@ class LikeDestroy(generics.DestroyAPIView):
     queryset = PostLike.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        like = get_object_or_404(PostLike, pk=self.kwargs['pk'], user=self.request.user)
-        return self.destroy(request, *args, **kwargs)
+        get_object_or_404(PostLike, user=self.request.user, post=get_object_or_404(Post, pk=self.kwargs['pk'])).delete()
+        return HttpResponse('Deleted')
 
 
 class CommentCreate(generics.CreateAPIView):
