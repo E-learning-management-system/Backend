@@ -390,7 +390,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostComment
-        fields = ['id', 'post_id', 'user_email', 'text', 'user_photo', 'date']
+        fields = ['id', 'post_id', 'user_email', 'text', 'date']
 
     """def get_user_photo(self, photo):
         if self.context.get('request').user.photo:
