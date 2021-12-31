@@ -641,10 +641,4 @@ class CourseStudentSearchList(generics.ListAPIView):
                                             user__name__startswith=self.kwargs['studentName'])
 
 
-class RetrieveProfilePhoto(generics.RetrieveAPIView):
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = User.objects.all()
 
-    def get_object(self):
-        return get_object_or_404(User, email=self.kwargs['email']).photo
