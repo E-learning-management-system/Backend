@@ -382,7 +382,7 @@ class SavePostSerializer(serializers.ModelSerializer):
     def get_comments(self, post):
         return PostComment.objects.filter(post=post).count()
 
-#
+
 class CommentSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
     user_email = serializers.ReadOnlyField(source='user.email')
