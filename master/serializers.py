@@ -386,11 +386,17 @@ class SavePostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
     user_email = serializers.ReadOnlyField(source='user.email')
-    user_photo = serializers.ReadOnlyField(source='user.photo')
+    user_photo = serializers.SerializerMethodField(allow_null=True)
 
     class Meta:
         model = PostComment
         fields = ['id', 'post_id', 'user_email', 'text', 'user_photo', 'date']
+
+    def get_user_photo(self, photo):
+        if self.context.get('request').user.photo:
+            return self.context.get('request').user.photo
+        else:
+            return None
 
 
 class LikeSerializer(serializers.ModelSerializer):
