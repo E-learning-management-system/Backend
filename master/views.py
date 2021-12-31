@@ -386,7 +386,7 @@ class RemoveSavedPosts(generics.ListCreateAPIView):
                 post.savedby.remove(self.request.user)
                 return HttpResponse('از حالت ذخیره خارج شد', status=201)
             except:
-                return HttpResponse('شما این پست را ذحیره نکرده اید',status=400)
+                return HttpResponse('شما این پست را ذحیره نکرده اید', status=400)
         elif self.request.user.type == 's':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
                 get_object_or_404(CourseStudent, user=self.request.user,
@@ -639,3 +639,12 @@ class CourseStudentSearchList(generics.ListAPIView):
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
                                             user__name__startswith=self.kwargs['studentName'])
+
+
+class RetrieveProfilePhoto(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
+
+    def get_object(self):
+        return get_object_or_404(User, email=self.kwargs['email']).photo
