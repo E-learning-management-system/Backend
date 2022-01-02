@@ -1,7 +1,7 @@
+import base64
+
 from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
-
 from .models import *
 
 
@@ -386,18 +386,18 @@ class SavePostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
     user_email = serializers.ReadOnlyField(source='user.email')
-    # user_photo = serializers.SerializerMethodField(allow_null=True)
+    user_photo = serializers.SerializerMethodField()
     is_teacher = serializers.SerializerMethodField()
 
     class Meta:
         model = PostComment
-        fields = ['id', 'post_id', 'user_email', 'is_teacher', 'text', 'date']
+        fields = ['id', 'post_id', 'user_email', 'user_photo', 'is_teacher', 'text', 'date']
 
-    """def get_user_photo(self, photo):
-        if self.context.get('request').user.photo:
-            return self.context.get('request').user.photo
-        else:
-            return None"""
+    def get_user_photo(self, comment):
+            if comment.user.photo:
+                return 'http://api.piazza.markop.ir/media/'+str(comment.user.photo)
+            else:
+                return None
 
     def get_is_teacher(self, comment):
         if comment.user.type == 't':
