@@ -104,7 +104,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     class Meta:
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
-        ordering = ['date_joined']
+        ordering = ['-date_joined']
 
 
 class Support(models.Model):
@@ -119,7 +119,7 @@ class Support(models.Model):
     class Meta:
         verbose_name = 'پشتیبانی'
         verbose_name_plural = 'پشتیبانی ها'
-        ordering = ['date']
+        ordering = ['-date']
 
 
 class Course(models.Model):
@@ -139,7 +139,7 @@ class Course(models.Model):
             return str(self.title) + ' ' + str(self.teacher)
 
     class Meta:
-        ordering = ['-title']
+        ordering = ['-id']
         verbose_name = 'درس'
         verbose_name_plural = 'درس ها'
 
@@ -156,6 +156,7 @@ class CourseStudent(models.Model):
             return str(self.user.email)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'دانشجو'
         verbose_name_plural = 'دانشجویان'
 
