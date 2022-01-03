@@ -104,7 +104,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     class Meta:
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
-        ordering = ['-date_joined']
+        ordering = ['-id']
 
 
 class Support(models.Model):
@@ -119,7 +119,7 @@ class Support(models.Model):
     class Meta:
         verbose_name = 'پشتیبانی'
         verbose_name_plural = 'پشتیبانی ها'
-        ordering = ['-date']
+        ordering = ['-id']
 
 
 class Course(models.Model):
@@ -195,7 +195,7 @@ class Post(models.Model):
         return str(self.id)
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-id']
         verbose_name = 'پست'
         verbose_name_plural = 'پست ها'
 
@@ -207,7 +207,7 @@ class PostComment(models.Model):
     date = models.DateTimeField(verbose_name='ایجاد شده در: ', auto_now_add=True, null=True)
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-id']
         verbose_name = 'کامنت'
         verbose_name_plural = 'کامنت ها'
 
@@ -220,7 +220,7 @@ class PostLike(models.Model):
     class Meta:
         verbose_name = 'لایک'
         verbose_name_plural = 'لایک ها'
-        ordering = ['-date']
+        ordering = ['-id']
 
 
 class Exercise(models.Model):
@@ -239,7 +239,7 @@ class Exercise(models.Model):
                             )
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-id']
         verbose_name = 'تمرین'
         verbose_name_plural = 'تمرین ها'
 
@@ -261,7 +261,7 @@ class Answer(models.Model):
                             )
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-id']
         verbose_name = 'پاسخ'
         verbose_name_plural = 'پاسخ ها'
 
