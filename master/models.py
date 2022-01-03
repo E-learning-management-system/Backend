@@ -11,7 +11,7 @@ def user_photo_directory_path(instance, filename):
 
 
 def post_image_directory_path(instance, filename):
-    return 'user/{0}/post/{1}'.format(str(instance.poster.email), filename)
+    return 'user/{0}/post/{1}'.format(str(instance.user.email), filename)
 
 
 def exercise_image_directory_path(instance, filename):
