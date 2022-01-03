@@ -6,6 +6,7 @@ from django.utils.crypto import get_random_string
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import *
@@ -203,10 +204,17 @@ class Support(generics.CreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 5
+
+
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
     search_fields = ['=title']
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return Course.objects.filter(Q(teacher=self.request.user) | Q(student__in=[self.request.user])).distinct()
@@ -238,6 +246,7 @@ class CourseStudentList(generics.ListAPIView):
     serializer_class = CourseStudentSerializer
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
     search_fields = ['=user__name']
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user)
@@ -290,6 +299,7 @@ class SubjectList(generics.ListAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
     search_fields = ['=title']
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -313,6 +323,7 @@ class SubjectRD(generics.RetrieveDestroyAPIView):
 class PostList(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -355,6 +366,7 @@ class PostCreate(generics.CreateAPIView):
 class SavedPostsListCreate(generics.ListCreateAPIView):
     serializer_class = SavePostSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def post(self, request, *args, **kwargs):
         if self.request.user.type == 't':
@@ -453,6 +465,7 @@ class CommentCreate(generics.CreateAPIView):
 class CommentList(generics.ListAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return PostComment.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
@@ -484,6 +497,7 @@ class CommentDelete(generics.DestroyAPIView):
 class ExerciseList(generics.ListAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         if self.request.user.type == 't':
@@ -539,6 +553,7 @@ class ExerciseRD(generics.RetrieveDestroyAPIView):
 class AnswerList(generics.ListAPIView):
     serializer_class = AnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def perform_authentication(self, request):
         if self.request.user.type != 't':
@@ -590,6 +605,7 @@ class StudentExerciseList(generics.ListAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
+    pagination_class = LargeResultsSetPagination
 
     def perform_authentication(self, request):
         if self.request.user.type != 's':
@@ -605,6 +621,7 @@ class TeacherExerciseList(generics.ListAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
+    pagination_class = LargeResultsSetPagination
 
     def perform_authentication(self, request):
         if self.request.user.type != 't':
@@ -618,6 +635,7 @@ class CourseSearchList(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get']
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return Course.objects.filter(title__startswith=self.kwargs['course'])
@@ -627,6 +645,7 @@ class SubjectSearchList(generics.ListAPIView):
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get']
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return Subject.objects.filter(title__startswith=self.kwargs['subject'])
@@ -635,6 +654,7 @@ class SubjectSearchList(generics.ListAPIView):
 class CourseStudentSearchList(generics.ListAPIView):
     serializer_class = CourseStudentSerializer
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
