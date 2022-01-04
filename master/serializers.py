@@ -358,7 +358,7 @@ class SavePostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ['id', 'user_id', 'user_email', 'is_liked', 'is_saved', 'course_teacher', 'course_id', 'course_title',
                   'title',
-                  'subject_id', 'subject_title', 'description', 'date', 'comments', 'likes']
+                  'subject_id', 'file', 'subject_title', 'description', 'date', 'comments', 'likes']
 
     def get_is_saved(self, post):
         if self.context.get('request').user in post.savedby.all():
