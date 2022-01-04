@@ -209,10 +209,12 @@ class LargeResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 5
 
+
 class CommentSetPagination(PageNumberPagination):
     page_size = 2
     page_query_param = 'page_size'
     max_page_size = 2
+
 
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
@@ -227,7 +229,6 @@ class CourseList(generics.ListAPIView):
 class CourseCreate(generics.CreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
-
 
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
@@ -298,6 +299,18 @@ class SubjectCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
         serializer.save(course=course)
+
+
+class AllSubjectList(generics.ListAPIView):
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Subject.objects.filter(course__teacher=self.request.user)
+        elif self.request.user.type == 's':
+            return Subject.objects.filter(course__coursestudent__user__in=[self.request.user])
 
 
 class SubjectList(generics.ListAPIView):
@@ -665,6 +678,3 @@ class CourseStudentSearchList(generics.ListAPIView):
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
                                             user__name__startswith=self.kwargs['studentName'])
-
-
-

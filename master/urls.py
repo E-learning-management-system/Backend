@@ -2,6 +2,7 @@ from django.urls import path
 from master import views as ms
 
 urlpatterns = [
+    path('allsubjects/', ms.AllSubjectList.as_view()),
     path('savepost/<int:pk>/', ms.SavedPostsListCreate.as_view()),
     path('savedposts/', ms.SavedPostsListCreate.as_view()),
     path('unsavepost/<int:pk>/', ms.RemoveSavedPosts.as_view()),
