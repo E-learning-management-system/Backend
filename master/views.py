@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .serializers import *
 from . import permissions as p
 from rest_framework.generics import get_object_or_404
+from django.template.loader import render_to_string
 
 
 class Signup(generics.CreateAPIView):
@@ -39,11 +40,11 @@ class Signup(generics.CreateAPIView):
             user.code = code
             user.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
-        data = 'به سورن خوش آمدید\n\nسورن سامانه هدفمند یادگیری الکترونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
+        msg_html = render_to_string('Email_Message.html', {'Verification_Code': code})
         send_mail('سورن',
-                  data,
+                  msg_html,
                   'no-reply-khu@markop.ir',
-                  [mail])
+                  [mail], html_message=msg_html)
         email = serializer.validated_data['email']
         return Response(email, status=status.HTTP_201_CREATED, headers=headers)
 
