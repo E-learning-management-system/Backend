@@ -40,12 +40,12 @@ class Signup(generics.CreateAPIView):
             user.code = code
             user.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
-        msg_html = render_to_string('templates/Email_Message.html', {'Verification_Code': code})
+        msg_html = render_to_string('Email_Message.html', {'Verification_Code': code})
         # data = 'به سورن خوش آمدید\n\nسورن سامانه هدفمند یادگیری الکترونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         send_mail('سورن',
-                  '',
+                  msg_html,
                   'no-reply-khu@markop.ir',
-                  [mail],html_message=msg_html)
+                  [mail], html_message=msg_html)
         email = serializer.validated_data['email']
         return Response(email, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -661,6 +661,3 @@ class CourseStudentSearchList(generics.ListAPIView):
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
                                             user__name__startswith=self.kwargs['studentName'])
-
-
-
