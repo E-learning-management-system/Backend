@@ -87,12 +87,12 @@ class ForgotPassword(generics.CreateAPIView):
             user = user.first()
             user.code = code
             user.save()
-        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
+        msg_html = render_to_string('Email_Message.html', {'Verification_Code': code})
         mail = '{0}'.format(str(serializer.validated_data['email']))
         send_mail('سورن',
-                  data,
+                  msg_html,
                   'no-reply-khu@markop.ir',
-                  [mail])
+                  [mail], html_message=msg_html)
         email = serializer.validated_data['email']
         return Response(email)
 
@@ -163,12 +163,12 @@ class ChangeEmail(generics.UpdateAPIView):
         if user:
             user.code = code
             user.save()
-        data = 'سورن سامانه هدمند یادگیری الکرونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
+        msg_html = render_to_string('Email_Message.html', {'Verification_Code': code})
         mail = '{0}'.format(str(serializer.validated_data['new_email']))
         send_mail('سورن',
-                  data,
+                  msg_html,
                   'no-reply-khu@markop.ir',
-                  [mail])
+                  [mail], html_message=msg_html)
         email = serializer.validated_data['new_email']
         return Response(email)
 
