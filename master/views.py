@@ -41,7 +41,6 @@ class Signup(generics.CreateAPIView):
             user.save()
         mail = '{0}'.format(str(serializer.validated_data['email']))
         msg_html = render_to_string('Email_Message.html', {'Verification_Code': code})
-        # data = 'به سورن خوش آمدید\n\nسورن سامانه هدفمند یادگیری الکترونیکی\n\nرمز یکبار مصرف : {0}'.format(str(code))
         send_mail('سورن',
                   msg_html,
                   'no-reply-khu@markop.ir',
