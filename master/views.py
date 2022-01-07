@@ -211,6 +211,12 @@ class LargeResultsSetPagination(PageNumberPagination):
     max_page_size = 5
 
 
+class CommentSetPagination(PageNumberPagination):
+    page_size = 2
+    page_query_param = 'page_size'
+    max_page_size = 2
+
+
 class CourseList(generics.ListAPIView):
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -294,6 +300,18 @@ class SubjectCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
         serializer.save(course=course)
+
+
+class AllSubjectList(generics.ListAPIView):
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self):
+        if self.request.user.type == 't':
+            return Subject.objects.filter(course__teacher=self.request.user)
+        elif self.request.user.type == 's':
+            return Subject.objects.filter(course__coursestudent__user__in=[self.request.user])
 
 
 class SubjectList(generics.ListAPIView):
@@ -426,15 +444,16 @@ class LikeCreate(generics.CreateAPIView):
         if like.exists():
             raise ValidationError('شما قبلا این پست را لایک کرده اید')
         else:
-            serializer.save(user=self.request.user, post=Post.objects.get(pk=self.kwargs['pk']))
+            serializer.save(user=self.request.user, post=get_object_or_404(Post, pk=self.kwargs['pk']))
 
 
 class LikeList(generics.ListAPIView):
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return PostLike.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
+        return PostLike.objects.filter(post=get_object_or_404(Post, pk=self.kwargs['pk']))
 
 
 class LikeDestroy(generics.DestroyAPIView):
@@ -466,10 +485,10 @@ class CommentCreate(generics.CreateAPIView):
 class CommentList(generics.ListAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = LargeResultsSetPagination
+    pagination_class = CommentSetPagination
 
     def get_queryset(self):
-        return PostComment.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']))
+        return PostComment.objects.filter(post=get_object_or_404(Post, pk=self.kwargs['pk']))
 
 
 class CommentDelete(generics.DestroyAPIView):
