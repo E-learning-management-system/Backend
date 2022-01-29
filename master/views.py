@@ -648,7 +648,7 @@ class TeacherExerciseList(generics.ListAPIView):
             raise ValidationError('فقط اساتید میتوانند تمارین خود را ببینند')
 
     def get_queryset(self):
-        return Exercise.objects.filter(user=self.request.user)
+        return Exercise.objects.filter(teacher=self.request.user)
 
 
 class CourseSearchList(generics.ListAPIView):
