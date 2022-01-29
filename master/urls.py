@@ -35,4 +35,6 @@ urlpatterns = [
     path('courses/<str:course>/', ms.CourseSearchList.as_view()),
     path('subjects/<str:subject>/', ms.SubjectSearchList.as_view()),
     path('courses/<int:pk>/students/<str:studentName>/', ms.CourseStudentSearchList.as_view()),
+    path('notAnswerStudents/<int:pk>/', ms.NotAnswerStudentList.as_view()),
+    path('answerStudents/<int:pk>/', ms.AnswerStudentList.as_view()),
 ]

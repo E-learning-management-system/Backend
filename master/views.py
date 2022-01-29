@@ -682,3 +682,21 @@ class CourseStudentSearchList(generics.ListAPIView):
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
                                             user__name__startswith=self.kwargs['studentName'])
+
+
+class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+        return Answer.objects.filter(exercise=exercise, file=None).user_set.all()
+
+
+class AnswerStudentList(generics.RetrieveDestroyAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+        return User.objects.exclude(Answer.objects.filter(exercise=exercise, file=None).user_set.all())
