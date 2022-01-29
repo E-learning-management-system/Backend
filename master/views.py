@@ -658,7 +658,7 @@ class CourseSearchList(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return Course.objects.filter(title__startswith=self.kwargs['course'])
+        return Course.objects.filter(title__startswith=self.kwargs['course'], teacher=self.request.user)
 
 
 class SubjectSearchList(generics.ListAPIView):
