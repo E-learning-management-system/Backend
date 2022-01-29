@@ -700,3 +700,9 @@ class AnswerStudentList(generics.RetrieveDestroyAPIView):
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
         return User.objects.exclude(Answer.objects.filter(exercise=exercise, file=None).user_set.all())
+
+
+class ExercisePut(generics.UpdateAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['put']
