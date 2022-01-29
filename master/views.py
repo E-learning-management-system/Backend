@@ -658,7 +658,10 @@ class CourseSearchList(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return Course.objects.filter(title__startswith=self.kwargs['course'])
+        if self.request.user.type == 't':
+            return Course.objects.filter(title__startswith=self.kwargs['course'], teacher=self.request.user)
+        elif self.request.user.type == 's':
+            return Course.objects.filter(title__startswith=self.kwargs['course'], student__in=[self.request.user])
 
 
 class SubjectSearchList(generics.ListAPIView):
@@ -668,7 +671,11 @@ class SubjectSearchList(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return Subject.objects.filter(title__startswith=self.kwargs['subject'])
+        if self.request.user.type == 't':
+            return Subject.objects.filter(title__startswith=self.kwargs['subject'], course__teacher=self.request.user)
+        if self.request.user.type == 's':
+            return Subject.objects.filter(title__startswith=self.kwargs['subject'],
+                                          course__student__in=[self.request.user])
 
 
 class CourseStudentSearchList(generics.ListAPIView):
@@ -679,3 +686,27 @@ class CourseStudentSearchList(generics.ListAPIView):
     def get_queryset(self):
         return CourseStudent.objects.filter(course=self.kwargs['pk'], course__teacher=self.request.user,
                                             user__name__startswith=self.kwargs['studentName'])
+
+
+class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+        return Answer.objects.filter(exercise=exercise, file=None).user_set.all()
+
+
+class AnswerStudentList(generics.RetrieveDestroyAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+        return User.objects.exclude(Answer.objects.filter(exercise=exercise, file=None).user_set.all())
+
+
+class ExercisePut(generics.UpdateAPIView):
+    serializer_class = ExerciseSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['put']
