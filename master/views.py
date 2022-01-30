@@ -648,7 +648,7 @@ class TeacherExerciseList(generics.ListAPIView):
             raise ValidationError('فقط اساتید میتوانند تمارین خود را ببینند')
 
     def get_queryset(self):
-        return Exercise.objects.filter(user=self.request.user)
+        return Exercise.objects.filter(teacher=self.request.user)
 
 
 class CourseSearchList(generics.ListAPIView):
@@ -694,7 +694,7 @@ class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter(exercise=exercise, file=None).user_set.all()
+        return Answer.objects.filter(exercise=exercise, file=None).values_list('user', flat=True).distinct();
 
 
 class AnswerStudentList(generics.RetrieveDestroyAPIView):
@@ -703,7 +703,8 @@ class AnswerStudentList(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return User.objects.exclude(Answer.objects.filter(exercise=exercise, file=None).user_set.all())
+        return User.objects.exclude(
+            Answer.objects.filter(exercise=exercise, file=None).values_list('user', flat=True).distinct());
 
 
 class ExercisePut(generics.UpdateAPIView):
