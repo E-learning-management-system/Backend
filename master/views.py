@@ -598,7 +598,7 @@ class AnswerCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
         exerciseCourseStudent = CourseStudent.objects.filter(course=exercise.course)
-        if self.request.user in exerciseCourseStudent[:]['user']:
+        if self.request.user in [e.user for e in exerciseCourseStudent]:
             serializer.save(exercise=exercise, user=self.request.user)
         else:
             raise ValidationError('شما به این عمل دسترسی ندارید')
