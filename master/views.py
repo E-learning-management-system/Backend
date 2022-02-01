@@ -580,7 +580,7 @@ class AnswerList(generics.ListAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'], user=self.request.user)
+        exercise = Exercise.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
         if exercise:
             return Answer.objects.filter(exercise=exercise)
         else:
