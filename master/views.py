@@ -711,4 +711,4 @@ class AnswerStudentList(generics.RetrieveDestroyAPIView):
 class ExercisePut(generics.UpdateAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ['put']
+    queryset = Exercise.objects.all()
