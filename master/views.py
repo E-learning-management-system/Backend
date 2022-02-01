@@ -694,7 +694,7 @@ class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter(exercise=exercise, file=None).values('user').distinct()
+        return exercise.course.student.exclude(Answer.objects.filter(exercise=exercise).values('user'))
 
 
 class AnswerStudentList(generics.RetrieveDestroyAPIView):
@@ -703,9 +703,7 @@ class AnswerStudentList(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return [e.user for e in Answer.objects.filter(exercise=exercise)] - [e.user for e in
-                                                                             Answer.objects.filter(exercise=exercise,
-                                                                                                   file=None)]
+        return Answer.objects.filter(exercise=exercise).values('user')
 
 
 class ExercisePut(generics.UpdateAPIView):
