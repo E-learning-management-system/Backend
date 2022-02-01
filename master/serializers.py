@@ -392,10 +392,10 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'post_id', 'user_email', 'user_photo', 'is_teacher', 'text', 'date']
 
     def get_user_photo(self, comment):
-            if comment.user.photo:
-                return 'http://api.piazza.markop.ir/media/'+str(comment.user.photo)
-            else:
-                return None
+        if comment.user.photo:
+            return 'http://api.piazza.markop.ir/media/' + str(comment.user.photo)
+        else:
+            return None
 
     def get_is_teacher(self, comment):
         if comment.user.type == 't':
@@ -427,7 +427,8 @@ class AnswerSerializer(serializers.ModelSerializer):
     exercise_id = serializers.ReadOnlyField(source='exercise.id')
     exercise_title = serializers.ReadOnlyField(source='exercise.title')
     user = serializers.ReadOnlyField(source='user.email')
+    username = serializers.ReadOnlyField(source='user.name')
 
     class Meta:
         model = Answer
-        fields = ['id', 'exercise_id', 'exercise_title', 'user', 'description', 'date', 'file']
+        fields = ['id', 'exercise_id', 'exercise_title', 'user', 'username', 'description', 'date', 'file']
