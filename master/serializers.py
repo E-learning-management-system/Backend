@@ -444,8 +444,8 @@ class CourseStudentAnswerSerializer(serializers.ModelSerializer):
 
 
 class UserAnswerSerializer(serializers.ModelSerializer):
-    # username = serializers.ReadOnlyField(source='exercise.course.student.name')
+    username = serializers.ReadOnlyField(source='name')
 
     class Meta:
-        model = Exercise
-        fields = '__all__'
+        model = User
+        fields = ['username', 'email']
