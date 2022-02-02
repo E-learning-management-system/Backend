@@ -432,3 +432,12 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'exercise_id', 'exercise_title', 'user', 'username', 'description', 'date', 'file']
+
+
+class CourseStudentAnswerSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.name')
+    email = serializers.ReadOnlyField(source='user.email')
+
+    class Meta:
+        model = CourseStudent
+        fields = ['username', 'email']
