@@ -689,21 +689,25 @@ class CourseStudentSearchList(generics.ListAPIView):
 
 
 class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
-    serializer_class = ExerciseSerializer
+    serializer_class = CourseStudentAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return exercise.course.student.exclude(Answer.objects.filter(exercise=exercise).values('user'))
+        course_students = CourseStudent.objects.filter(course=exercise.course).values_list('user')
+        answer_students = Answer.objects.filter(exercise=exercise).values_list('user')
+        not_answer_students = course_students.exclude(user__in=answer_students)
+        return CourseStudent.objects.filter(user__in=not_answer_students)
 
 
 class AnswerStudentList(generics.RetrieveDestroyAPIView):
-    serializer_class = ExerciseSerializer
+    serializer_class = CourseStudentAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter(exercise=exercise).values('user')
+        answer_students = Answer.objects.filter(exercise=exercise).values_list('user')
+        return CourseStudent.objects.filter(user__in=answer_students)
 
 
 class ExercisePut(generics.UpdateAPIView):
