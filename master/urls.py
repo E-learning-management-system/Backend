@@ -39,5 +39,5 @@ urlpatterns = [
     path('answerstudents/<int:pk>/', ms.AnswerStudentList.as_view()),
     path('exercise-u/<int:pk>/', ms.ExercisePut.as_view()),
     path('exercise/<int:pk>', ms.StudentAnswerCheck.as_view()),
-    path('courses/<int:coursepk>/students/<int:pk>', ms.CourseStudentDelete.as_view()),
+
 ]
