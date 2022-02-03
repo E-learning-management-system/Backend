@@ -686,23 +686,28 @@ class CourseStudentSearchList(generics.ListAPIView):
                                             user__name__startswith=self.kwargs['studentName'])
 
 
-class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
+class NotAnswerStudentList(generics.ListAPIView):
     serializer_class = UserAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        answer_students = Answer.objects.filter(exercise=exercise).values_list('user')
-        return exercise.course.student.exclude(pk__in=[answer_students])
+        a = []
+        b = []
+        for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=1)):
+            a.append(i.user.id)
+        for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=1).course):
+            if j.user.id not in a:
+                b.append(j.user.id)
+        return CourseStudent.objects.filter(~Q(pk__in=b))
 
 
-class AnswerStudentList(generics.RetrieveDestroyAPIView):
+class AnswerStudentList(generics.ListAPIView):
     serializer_class = CourseStudentAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter(exercise=exercise)
+        return Answer.objects.filter()
 
 
 class ExercisePut(generics.UpdateAPIView):
