@@ -602,14 +602,35 @@ class AnswerCreate(generics.CreateAPIView):
             raise ValidationError('شما به این عمل دسترسی ندارید')
 
 
-class AnswerRD(generics.RetrieveDestroyAPIView):
+class AnswerRD(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnswerSerializer
     permission_classes = [IsAuthenticated]
     queryset = Answer.objects.all()
 
     def perform_authentication(self, request):
-        if (self.request.user.type != 's') and (self.request.method == 'DELETE'):
-            raise ValidationError('فقط دانشجویان میتوانند جواب تمرین را حذف کنند')
+        if self.request.user.type != 's':
+            raise ValidationError('فقط دانشجویان می توانند جواب تمرین را تغییر دهند!')
+
+    def get(self, request, *args, **kwargs):
+        answer = Answer.objects.get(pk=self.kwargs['pk'])
+        if answer.user == self.request.user:
+            return self.retrieve(request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def put(self, request, *args, **kwargs):
+        answer = Answer.objects.get(pk=self.kwargs['pk'])
+        if answer.user == self.request.user:
+            return self.update(request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
+
+    def patch(self, request, *args, **kwargs):
+        answer = Answer.objects.get(pk=self.kwargs['pk'])
+        if answer.user == self.request.user:
+            return self.partial_update(request, *args, **kwargs)
+        else:
+            raise ValidationError('شما به این عمل دسترسی ندارید')
 
     def delete(self, request, *args, **kwargs):
         answer = Answer.objects.get(pk=self.kwargs['pk'])
@@ -715,15 +736,15 @@ class ExercisePut(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Exercise.objects.all()
 
-
-class StudentAnswerList(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = AnswerSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter(exercise=exercise, user=self.request.user)
-
+#
+# class StudentAnswerEdit(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = AnswerSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#     def get_queryset(self):
+#         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
+#         return Answer.objects.filter(exercise=exercise, user=self.request.user)
+#
 
 class CourseStudentDelete(generics.DestroyAPIView):
     serializer_class = CourseStudentSerializer
