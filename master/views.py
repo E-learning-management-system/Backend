@@ -736,15 +736,14 @@ class ExercisePut(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Exercise.objects.all()
 
-#
-# class StudentAnswerEdit(generics.RetrieveUpdateDestroyAPIView):
-#     serializer_class = AnswerSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#     def get_queryset(self):
-#         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-#         return Answer.objects.filter(exercise=exercise, user=self.request.user)
-#
+
+class StudentAnswerCheck(generics.ListAPIView):
+    serializer_class = AnswerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk']), user=self.request.user)
+
 
 class CourseStudentDelete(generics.DestroyAPIView):
     serializer_class = CourseStudentSerializer
