@@ -719,7 +719,7 @@ class NotAnswerStudentList(generics.ListAPIView):
         for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=self.kwargs['pk']).course):
             if j.user.id not in a:
                 b.append(j.user.id)
-        return CourseStudent.objects.filter(~Q(pk__in=b)).distinct()
+        return CourseStudent.objects.filter(user__id__in=b, course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
 
 
 class AnswerStudentList(generics.ListAPIView):
@@ -745,13 +745,4 @@ class StudentAnswerCheck(generics.ListAPIView):
         return Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk']), user=self.request.user)
 
 
-class CourseStudentDelete(generics.DestroyAPIView):
-    serializer_class = CourseStudentSerializer
-    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
-    queryset = CourseStudent.objects.all()
 
-    def delete(self, request, *args, **kwargs):
-        student = get_object_or_404(CourseStudent, pk=kwargs['pk'], course=kwargs['coursepk'],
-                                    course__teacher=self.request.user)
-        student.delete()
-        return self.destroy(self, request, *args, **kwargs)
