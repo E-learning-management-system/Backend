@@ -693,7 +693,7 @@ class NotAnswerStudentList(generics.RetrieveDestroyAPIView):
     def get_queryset(self):
         exercise = Exercise.objects.get(pk=self.kwargs['pk'])
         answer_students = Answer.objects.filter(exercise=exercise).values_list('user')
-        return exercise.course.student.exclude(pk__in=answer_students)
+        return exercise.course.student.exclude(pk__in=[answer_students])
 
 
 class AnswerStudentList(generics.RetrieveDestroyAPIView):
