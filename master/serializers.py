@@ -428,9 +428,7 @@ class CourseStudentAnswerSerializer(serializers.ModelSerializer):
 
 
 class UserAnswerSerializer(serializers.ModelSerializer):
-    username = serializers.ReadOnlyField(source='user.name')
-    email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
-        model = CourseStudent
-        fields = ['username', 'email']
+        model = User
+        fields = ['name', 'email']

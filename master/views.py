@@ -693,9 +693,9 @@ class NotAnswerStudentList(generics.ListAPIView):
     def get_queryset(self):
         a = []
         b = []
-        for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=1)):
+        for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk'])):
             a.append(i.user.id)
-        for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=1).course):
+        for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=self.kwargs['pk']).course):
             if j.user.id not in a:
                 b.append(j.user.id)
         return CourseStudent.objects.filter(~Q(pk__in=b)).distinct()
