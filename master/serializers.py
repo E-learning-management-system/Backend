@@ -410,21 +410,21 @@ class ExerciseSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     exercise_id = serializers.ReadOnlyField(source='exercise.id')
     exercise_title = serializers.ReadOnlyField(source='exercise.title')
-    user = serializers.ReadOnlyField(source='user.email')
-    username = serializers.ReadOnlyField(source='user.name')
+    user_email = serializers.ReadOnlyField(source='user.email')
+    name = serializers.ReadOnlyField(source='user.name')
 
     class Meta:
         model = Answer
-        fields = ['id', 'exercise_id', 'exercise_title', 'user', 'username', 'description', 'date', 'file']
+        fields = ['id', 'exercise_id', 'exercise_title', 'user_email', 'name', 'description', 'date', 'file']
 
 
 class CourseStudentAnswerSerializer(serializers.ModelSerializer):
-    username = serializers.ReadOnlyField(source='user.name')
+    name = serializers.ReadOnlyField(source='user.name')
     email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = Answer
-        fields = ['username', 'email']
+        fields = ['name', 'email']
 
 
 class UserAnswerSerializer(serializers.ModelSerializer):
