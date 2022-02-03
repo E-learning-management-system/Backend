@@ -698,7 +698,7 @@ class NotAnswerStudentList(generics.ListAPIView):
         for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=1).course):
             if j.user.id not in a:
                 b.append(j.user.id)
-        return CourseStudent.objects.filter(~Q(pk__in=b))
+        return CourseStudent.objects.filter(~Q(pk__in=b)).distinct()
 
 
 class AnswerStudentList(generics.ListAPIView):
