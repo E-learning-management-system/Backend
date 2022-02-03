@@ -737,7 +737,7 @@ class ExercisePut(generics.UpdateAPIView):
     queryset = Exercise.objects.all()
 
 
-class StudentAnswerEdit(generics.ListAPIView):
+class StudentAnswerCheck(generics.ListAPIView):
     serializer_class = AnswerSerializer
     permission_classes = [IsAuthenticated]
 
