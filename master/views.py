@@ -9,6 +9,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .serializers import *
 from . import permissions as p
 from rest_framework.generics import get_object_or_404
@@ -138,16 +140,12 @@ class UserProfile(generics.RetrieveAPIView):
         return get_object_or_404(User, email=self.kwargs['email'])
 
 
-class DeleteAccount(generics.UpdateAPIView):
-    serializer_class = DeleteAccountSerializer
+class DeleteAccount(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        if hasattr(user, 'auth_token'):
-            user.auth_token.delete()
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        user.delete()
         return Response(status=status.HTTP_200_OK)
 
 
