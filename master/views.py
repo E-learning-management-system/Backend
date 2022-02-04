@@ -731,8 +731,8 @@ class AnswerStudentList(generics.ListAPIView):
         a = []
         for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk'])):
             a.append(i.user.id)
-        CourseStudent.objects.filter(user__id__in=a,
-                                     course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
+        return CourseStudent.objects.filter(user__id__in=a,
+                                            course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
 
 
 class ExercisePut(generics.UpdateAPIView):
