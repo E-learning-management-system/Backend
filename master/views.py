@@ -719,16 +719,20 @@ class NotAnswerStudentList(generics.ListAPIView):
         for j in CourseStudent.objects.filter(course=Exercise.objects.get(pk=self.kwargs['pk']).course):
             if j.user.id not in a:
                 b.append(j.user.id)
-        return CourseStudent.objects.filter(user__id__in=b, course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
+        return CourseStudent.objects.filter(user__id__in=b,
+                                            course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
 
 
 class AnswerStudentList(generics.ListAPIView):
-    serializer_class = CourseStudentAnswerSerializer
+    serializer_class = UserAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter()
+        a = []
+        for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk'])):
+            a.append(i.user.id)
+        return CourseStudent.objects.filter(user__id__in=a,
+                                            course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
 
 
 class ExercisePut(generics.UpdateAPIView):
@@ -743,6 +747,3 @@ class StudentAnswerCheck(generics.ListAPIView):
 
     def get_queryset(self):
         return Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk']), user=self.request.user)
-
-
-
