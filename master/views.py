@@ -724,12 +724,15 @@ class NotAnswerStudentList(generics.ListAPIView):
 
 
 class AnswerStudentList(generics.ListAPIView):
-    serializer_class = CourseStudentAnswerSerializer
+    serializer_class = UserAnswerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        exercise = Exercise.objects.get(pk=self.kwargs['pk'])
-        return Answer.objects.filter()
+        a = []
+        for i in Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk'])):
+            a.append(i.user.id)
+        return CourseStudent.objects.filter(user__id__in=a,
+                                            course=Exercise.objects.get(pk=self.kwargs['pk']).course).distinct()
 
 
 class ExercisePut(generics.UpdateAPIView):
@@ -744,15 +747,3 @@ class StudentAnswerCheck(generics.ListAPIView):
 
     def get_queryset(self):
         return Answer.objects.filter(exercise=Exercise.objects.get(pk=self.kwargs['pk']), user=self.request.user)
-
-
-class CourseStudentDelete(generics.DestroyAPIView):
-    serializer_class = CourseStudentSerializer
-    permission_classes = [permissions.IsAuthenticated, p.IsTeacher]
-    queryset = CourseStudent.objects.all()
-
-    def delete(self, request, *args, **kwargs):
-        student = get_object_or_404(CourseStudent, pk=kwargs['pk'], course=kwargs['coursepk'],
-                                    course__teacher=self.request.user)
-        student.delete()
-        return self.destroy(self, request, *args, **kwargs)
