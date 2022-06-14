@@ -13,6 +13,16 @@ from .models import *
 
 class TestBase(TestCase):
     def setUp(self) -> None:
+        user_1 = User.objects.create_superuser(email='amir@gmail.com', password='abcd')
+        user_1.type = 't'
+        user_1.save()
+        user_2 = User.objects.create_superuser(email='b@gmail.com', password='abcd')
+        user_2.type = 's'
+        user_2.name = 'Amir'
+        user_2.save()
+        user_3 = User.objects.create_superuser(email='a@gmail.com', password='abcd')
+        user_3.type = 't'
+        user_3.save()
         self.client = Client()
 
     def tearDown(self) -> None:
@@ -56,6 +66,7 @@ class TestCourses(TestBase):
                                                                     'exam_date': '2020-05-05T05:13:10',
                                                                     'end_date': '2020-05-07'})
         r_content = json.loads(response.content)
+        print(r_content)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(r_content.get('title'), 'Course 1')
         Course.objects.get(title='Course 1').delete()
