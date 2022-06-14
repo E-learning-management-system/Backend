@@ -1,12 +1,12 @@
-from django.test import Client, TestCase
 import os
+
+from django.test import Client, TestCase
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'piazza.settings')
 import django
 
 django.setup()
 
-import pytest
 import json
 from .models import *
 
@@ -255,8 +255,8 @@ class TestSubjects(TestBase):
     def test_all_subjects_as_teacher_multiple_subjects_one_course(self):
         self.client.login(email='amir@gmail.com', password='abcd')
         course = Course.objects.create(title='Course 1', description='Nothing',
-                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
-                                         end_date='2020-05-06', exam_date='2020-05-07')
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
         sub_1 = Subject.objects.create(course=course, title='Sub 1')
         sub_2 = Subject.objects.create(course=course, title='Sub 2')
         response = self.client.get('/soren/allsubjects/')
