@@ -13,6 +13,16 @@ from .models import *
 
 class TestBase(TestCase):
     def setUp(self) -> None:
+        user_1 = User.objects.create_superuser(email='amir@gmail.com', password='abcd')
+        user_1.type = 't'
+        user_1.save()
+        user_2 = User.objects.create_superuser(email='b@gmail.com', password='abcd')
+        user_2.type = 's'
+        user_2.name = 'Amir'
+        user_2.save()
+        user_3 = User.objects.create_superuser(email='a@gmail.com', password='abcd')
+        user_3.type = 't'
+        user_3.save()
         self.client = Client()
 
     def tearDown(self) -> None:
@@ -56,6 +66,7 @@ class TestCourses(TestBase):
                                                                     'exam_date': '2020-05-05T05:13:10',
                                                                     'end_date': '2020-05-07'})
         r_content = json.loads(response.content)
+        print(r_content)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(r_content.get('title'), 'Course 1')
         Course.objects.get(title='Course 1').delete()
@@ -213,6 +224,89 @@ class TestSubjects(TestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(r_content.get('title'), 'Sub 1')
 
+    def test_unauthorized_all_subjects_should_fail(self):
+        response = self.client.get("/soren/allsubjects/")
+        r_content = json.loads(response.content).get('detail')
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(r_content, 'اطلاعات برای اعتبارسنجی ارسال نشده است.')
+
+    def test_all_subjects_as_teacher_returns_empty(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content.get('results'), [])
+
+    def test_all_subjects_as_teacher_multiple_subjects_multiple_courses(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course_1 = Course.objects.create(title='Course 1', description='Nothing',
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
+        course_2 = Course.objects.create(title='Course 2', description='Nothing',
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
+        sub_1 = Subject.objects.create(course=course_1, title='Sub 1')
+        sub_2 = Subject.objects.create(course=course_2, title='Sub 2')
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content).get('results')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content[0].get('title'), 'Sub 2')
+
+    def test_all_subjects_as_teacher_multiple_subjects_one_course(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
+        sub_1 = Subject.objects.create(course=course, title='Sub 1')
+        sub_2 = Subject.objects.create(course=course, title='Sub 2')
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content).get('results')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content[0].get('title'), 'Sub 2')
+        self.assertEqual(r_content[1].get('title'), 'Sub 1')
+
+    def test_all_subjects_as_student_returns_empty(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content).get('results')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content, [])
+
+    def test_all_subjects_as_student_one_course_multiple_subjects(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        sub_1 = Subject.objects.create(course=course, title='Sub 1')
+        sub_2 = Subject.objects.create(course=course, title='Sub 2')
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content).get('results')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content[0].get('title'), 'Sub 2')
+        self.assertEqual(r_content[1].get('title'), 'Sub 1')
+
+    def test_all_subjects_as_student_multiple_courses_multiple_subjects(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course_1 = Course.objects.create(title='Course 1', description='Nothing',
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
+        course_2 = Course.objects.create(title='Course 2', description='Nothing',
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
+        course_1.student.add(User.objects.get(email='b@gmail.com'))
+        course_2.student.add(User.objects.get(email='b@gmail.com'))
+        sub_1 = Subject.objects.create(course=course_1, title='Sub 1')
+        sub_2 = Subject.objects.create(course=course_2, title='Sub 2')
+        response = self.client.get('/soren/allsubjects/')
+        r_content = json.loads(response.content).get('results')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content[0].get('title'), 'Sub 2')
+
 
 class TestPosts(TestBase):
 
@@ -289,6 +383,38 @@ class TestPosts(TestBase):
         r_content = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(r_content.get('description'), ['این مقدار لازم است.'])
+
+    def test_save_post_unauthorized_should_fail(self):
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        subject = Subject.objects.create(course=course, title='Subject 1')
+        post = Post.objects.create(subject=subject, user=User.objects.get(email='amir@gmail.com'), description='Post 1')
+        response = self.client.post(f'/soren/savepost/{post.id}/')
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(json.loads(response.content).get('detail'), 'اطلاعات برای اعتبارسنجی ارسال نشده است.')
+
+    def test_save_post_as_teacher_from_another_course_should_fail(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        subject = Subject.objects.create(course=course, title='Subject 1')
+        post = Post.objects.create(subject=subject, user=User.objects.get(email='amir@gmail.com'), description='Post 1')
+        response = self.client.post(f'/soren/savepost/{post.id}/')
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(json.loads(response.content).get('detail'), 'یافت نشد.')
+
+    def test_save_post_as_student_from_another_course_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        subject = Subject.objects.create(course=course, title='Subject 1')
+        post = Post.objects.create(subject=subject, user=User.objects.get(email='amir@gmail.com'), description='Post 1')
+        response = self.client.post(f'/soren/savepost/{post.id}/')
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(json.loads(response.content).get('detail'), 'یافت نشد.')
 
 
 class TestLikes(TestBase):
