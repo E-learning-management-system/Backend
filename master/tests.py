@@ -1,12 +1,12 @@
-import os
-
 from django.test import Client, TestCase
+import os
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'piazza.settings')
 import django
 
 django.setup()
 
+import pytest
 import json
 from .models import *
 
@@ -66,10 +66,8 @@ class TestCourses(TestBase):
                                                                     'exam_date': '2020-05-05T05:13:10',
                                                                     'end_date': '2020-05-07'})
         r_content = json.loads(response.content)
-        print(r_content)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(r_content.get('title'), 'Course 1')
-        Course.objects.get(title='Course 1').delete()
 
     def test_new_course_as_student_should_fail(self):
         self.client.login(email='b@gmail.com', password='abcd')
@@ -102,6 +100,72 @@ class TestCourses(TestBase):
         r_content = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(r_content.get('non_field_errors'), ['تاریخ پایان باید بعد از تاریخ آغاز باشد.'])
+
+    def test_retrieve_course_as_student(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.get(f'/soren/course-rud/{course.id}/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content.get('course_title'), 'Course 1')
+
+    def test_retrieve_course_as_teacher(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.get(f'/soren/course-rud/{course.id}/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content.get('course_title'), 'Course 1')
+        self.assertEqual(r_content.get('description'), 'Nothing')
+
+    def test_update_course_as_student_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.put(path=f'/soren/course-rud/{course.id}/',
+                                   data={'description': 'descp', 'start_date': '2020-05-05', 'end_date': '2020-05-06',
+                                         'exam_date': '2020-05-07'})
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(r_content, {'detail': 'یافت نشد.'})
+
+    def test_update_course_as_teacher(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.put(f'/soren/course-rud/{course.id}/',
+                                   {
+                                       "description": "put",
+                                       "start_date": "2022-07-15",
+                                       "end_date": "2022-07-15",
+                                       "exam_date": "2022-07-15T16:03:10.215Z"
+                                   })
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 415)
+
+    def test_delete_course_as_student_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.delete(f'/soren/course-rud/{course.id}/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(r_content, {'detail': 'یافت نشد.'})
+
+    def test_delete_course(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.delete(f'/soren/course-rud/{course.id}/')
+        self.assertEqual(response.status_code, 204)
 
 
 class TestCourseStudents(TestBase):
@@ -157,6 +221,17 @@ class TestCourseStudents(TestBase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(r_content, 'این دانشجو قبلا اضافه شده است')
 
+    def test_delete_course_student_as_student_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        user = User.objects.get(email='b@gmail.com')
+        course.student.add(user)
+        response = self.client.get(f'/soren/student-rd/{CourseStudent.objects.get(user=user, course=course).id}/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 403)
+        print(r_content)
 
 class TestSubjects(TestBase):
     def test_view_no_subjects(self):
@@ -255,8 +330,8 @@ class TestSubjects(TestBase):
     def test_all_subjects_as_teacher_multiple_subjects_one_course(self):
         self.client.login(email='amir@gmail.com', password='abcd')
         course = Course.objects.create(title='Course 1', description='Nothing',
-                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
-                                       end_date='2020-05-06', exam_date='2020-05-07')
+                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                         end_date='2020-05-06', exam_date='2020-05-07')
         sub_1 = Subject.objects.create(course=course, title='Sub 1')
         sub_2 = Subject.objects.create(course=course, title='Sub 2')
         response = self.client.get('/soren/allsubjects/')
