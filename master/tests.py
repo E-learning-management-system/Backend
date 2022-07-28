@@ -31,7 +31,6 @@ class TestBase(TestCase):
         pass
 
 
-
 class TestCourses(TestBase):
     def test_zero_returns_nothing(self):
         self.client.login(email='amir@gmail.com', password='abcd')
@@ -942,14 +941,14 @@ class TestUser(TestCase):
         self.assertTrue(sample_user.id)
 
     def test_user_without_email(self):
-        self.assertTrue(ValueError, lambda: User.objects.create_user(
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
             type='t',
             university='test',
             email='',
             password='123456'
         ))
 
-        self.assertTrue(TypeError, lambda: User.objects.create_user(
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
             type='t',
             university='test',
             password='123456'
@@ -974,49 +973,48 @@ class TestUser(TestCase):
         self.assertTrue(sample_user.is_superuser)
 
 
-# class TestValidators(TestCase):
-#
-#     def test_validate_email_contain_at_sign(self):
-#         sample_email = 'example.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_multiple_at_sign(self):
-#         sample_email = 'A@b@c@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_no_special_char_in_local_part(self):
-#         sample_email = 'a”b(c)d,e:f;gi[j\k]l@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#
-#     def test_validate_email_quoted_strings(self):
-#         sample_email = 'abc”test”email@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_spaces_quotes_and_backslashes(self):
-#         sample_email = 'abc is”not\\valid@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_quotes_after_backslash(self):
-#         sample_email = 'abc\is\”not\\valid@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_double_dot_before(self):
-#         sample_email = '.test@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_double_dot_before_domain(self):
-#         sample_email = 'test@domain..com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_leading_space(self):
-#         sample_email = 'test@domain.com    '
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_trailing_space(self):
-#         sample_email = '    test@domain.com'
-#         self.assertFalse(validate_email(sample_email))
-#
-#     def test_validate_email_valid_form(self):
-#         sample_email = 'test@domain.com'
-#         self.assertFalse(validate_email(sample_email))
+class TestValidators(TestCase):
+
+    def test_validate_email_contain_at_sign(self):
+        sample_email = 'example.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_multiple_at_sign(self):
+        sample_email = 'A@b@c@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_no_special_char_in_local_part(self):
+        sample_email = 'a”b(c)d,e:f;gi[j\k]l@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_quoted_strings(self):
+        sample_email = 'abc”test”email@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_spaces_quotes_and_backslashes(self):
+        sample_email = 'abc is”not\\valid@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_quotes_after_backslash(self):
+        sample_email = 'abc\is\”not\\valid@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_double_dot_before(self):
+        sample_email = '.test@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_double_dot_before_domain(self):
+        sample_email = 'test@domain..com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_leading_space(self):
+        sample_email = 'test@domain.com    '
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_trailing_space(self):
+        sample_email = '    test@domain.com'
+        self.assertRaises(ValidationError, lambda: validate_email(sample_email))
+
+    def test_validate_email_valid_form(self):
+        sample_email = 'test@domain.com'
+        self.assertIsNone(validate_email(sample_email))
