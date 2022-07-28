@@ -1,4 +1,5 @@
-from django.test import Client, TestCase
+from django.core.validators import *
+from django.test import Client, TestCase, SimpleTestCase
 import os
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'piazza.settings')
@@ -9,6 +10,7 @@ django.setup()
 import pytest
 import json
 from .models import *
+from django.urls import reverse, resolve
 
 
 class TestBase(TestCase):
@@ -27,6 +29,7 @@ class TestBase(TestCase):
 
     def tearDown(self) -> None:
         pass
+
 
 
 class TestCourses(TestBase):
@@ -233,6 +236,7 @@ class TestCourseStudents(TestBase):
         self.assertEqual(response.status_code, 403)
         print(r_content)
 
+
 class TestSubjects(TestBase):
     def test_view_no_subjects(self):
         course = Course.objects.create(title='Course 1', description='Nothing',
@@ -330,8 +334,8 @@ class TestSubjects(TestBase):
     def test_all_subjects_as_teacher_multiple_subjects_one_course(self):
         self.client.login(email='amir@gmail.com', password='abcd')
         course = Course.objects.create(title='Course 1', description='Nothing',
-                                         teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
-                                         end_date='2020-05-06', exam_date='2020-05-07')
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
         sub_1 = Subject.objects.create(course=course, title='Sub 1')
         sub_2 = Subject.objects.create(course=course, title='Sub 2')
         response = self.client.get('/soren/allsubjects/')
@@ -861,3 +865,158 @@ class TestSearch(TestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(r_content[0].get('course_id'), course.id)
         self.assertEqual(r_content[0].get('email'), 'b@gmail.com')
+
+
+import master.views as v
+
+
+class TestUrls(SimpleTestCase):
+
+    def test_user_signup_resolved(self):
+        url = reverse('Signup')
+        self.assertEqual(resolve(url).func.view_class, v.Signup)
+
+    def test_user_signup_verification_resolved(self):
+        url = reverse('Signup Verification')
+        self.assertEqual(resolve(url).func.view_class, v.SVerification)
+
+    def test_user_signin_resolved(self):
+        url = reverse('Signin')
+        self.assertEqual(resolve(url).func.view_class, v.Signin)
+
+    def test_user_forgot_password_resolved(self):
+        url = reverse('Forgot Password')
+        self.assertEqual(resolve(url).func.view_class, v.ForgotPassword)
+
+    def test_user_forgot_password_verification_resolved(self):
+        url = reverse('Forgot Password Verification')
+        self.assertEqual(resolve(url).func.view_class, v.Verification)
+
+    def test_user_forgot_password_change_password_resolved(self):
+        url = reverse('Forgot Password Change Password')
+        self.assertEqual(resolve(url).func.view_class, v.FPChangePassword)
+
+    def test_user_profile_resolved(self):
+        url = reverse('Profile')
+        self.assertEqual(resolve(url).func.view_class, v.Profile)
+
+    def test_user_delete_account_resolved(self):
+        url = reverse('Delete Account')
+        self.assertEqual(resolve(url).func.view_class, v.DeleteAccount)
+
+    def test_user_change_email_resolved(self):
+        url = reverse('Change Email')
+        self.assertEqual(resolve(url).func.view_class, v.ChangeEmail)
+
+    def test_user_email_verification_resolved(self):
+        url = reverse('Email Verification')
+        self.assertEqual(resolve(url).func.view_class, v.EmailVerification)
+
+    def test_user_change_password_resolved(self):
+        url = reverse('Change Password')
+        self.assertEqual(resolve(url).func.view_class, v.ChangePassword)
+
+    def test_user_support_resolved(self):
+        url = reverse('Support')
+        self.assertEqual(resolve(url).func.view_class, v.Support)
+
+
+class TestUser(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            type='t',
+            university='test',
+            email='ab@ab.com',
+            password='12345678',
+        )
+
+    def test_user_create_successfully(self):
+        sample_user = User.objects.create_user(
+            type='t',
+            university='test',
+            email='sample@test.test',
+            password='123456',
+        )
+
+        self.assertTrue(sample_user.id)
+
+    def test_user_without_email(self):
+        self.assertTrue(ValueError, lambda: User.objects.create_user(
+            type='t',
+            university='test',
+            email='',
+            password='123456'
+        ))
+
+        self.assertTrue(TypeError, lambda: User.objects.create_user(
+            type='t',
+            university='test',
+            password='123456'
+        ))
+
+    def test_user_is_active_by_default(self):
+        self.assertFalse(self.user.is_active)
+
+    def test_user_assign_email_on_creation(self):
+        self.assertEqual(self.user.email, 'ab@ab.com')
+
+    def test_user_assign_password_on_creation(self):
+        self.assertTrue(self.user.check_password('12345678'))
+
+    def test_user_create_superuser_successfully(self):
+        sample_user = User.objects.create_superuser(
+            email='sample@test.test',
+            password='123456',
+        )
+
+        self.assertTrue(sample_user.is_staff)
+        self.assertTrue(sample_user.is_superuser)
+
+
+# class TestValidators(TestCase):
+#
+#     def test_validate_email_contain_at_sign(self):
+#         sample_email = 'example.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_multiple_at_sign(self):
+#         sample_email = 'A@b@c@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_no_special_char_in_local_part(self):
+#         sample_email = 'a”b(c)d,e:f;gi[j\k]l@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#
+#     def test_validate_email_quoted_strings(self):
+#         sample_email = 'abc”test”email@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_spaces_quotes_and_backslashes(self):
+#         sample_email = 'abc is”not\\valid@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_quotes_after_backslash(self):
+#         sample_email = 'abc\is\”not\\valid@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_double_dot_before(self):
+#         sample_email = '.test@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_double_dot_before_domain(self):
+#         sample_email = 'test@domain..com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_leading_space(self):
+#         sample_email = 'test@domain.com    '
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_trailing_space(self):
+#         sample_email = '    test@domain.com'
+#         self.assertFalse(validate_email(sample_email))
+#
+#     def test_validate_email_valid_form(self):
+#         sample_email = 'test@domain.com'
+#         self.assertFalse(validate_email(sample_email))
