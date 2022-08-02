@@ -954,14 +954,47 @@ class TestUser(TestCase):
             password='123456'
         ))
 
-    def test_user_is_active_by_default(self):
-        self.assertFalse(self.user.is_active)
+    def test_user_without_type(self):
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            type='',
+            university='test',
+            email='sample@test.test',
+            password='123456'
+        ))
 
-    def test_user_assign_email_on_creation(self):
-        self.assertEqual(self.user.email, 'ab@ab.com')
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            university='test',
+            email='sample@test.test',
+            password='123456'
+        ))
 
-    def test_user_assign_password_on_creation(self):
-        self.assertTrue(self.user.check_password('12345678'))
+    def test_user_without_university(self):
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            type='t',
+            university='',
+            email='sample@test.test',
+            password='123456'
+        ))
+
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            type='t',
+            email='sample@test.test',
+            password='123456'
+        ))
+
+    def test_user_without_password(self):
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            type='t',
+            university='test',
+            email='sample@test.test',
+            password=''
+        ))
+
+        self.assertRaises(ValueError, lambda: User.objects.create_user(
+            type='t',
+            university='test',
+            email='sample@test.test',
+        ))
 
     def test_user_create_superuser_successfully(self):
         sample_user = User.objects.create_superuser(
@@ -971,6 +1004,42 @@ class TestUser(TestCase):
 
         self.assertTrue(sample_user.is_staff)
         self.assertTrue(sample_user.is_superuser)
+
+    def test_user_avatar_directory_path(self):
+        sample_user = User.objects.create_superuser(
+            email='sample@test.test',
+            password='123456',
+        )
+        sample_filename = 'avatar.jpg'
+
+        expected = 'user/sample@test.test/photo/avatar.jpg'
+
+        self.assertEqual(user_photo_directory_path(sample_user, sample_filename), expected)
+
+    def test_SigninApiView_400_1(self):
+        url = reverse('Signin')
+        body = {
+            "email": "aa",
+            "password": "12345678"
+        }
+
+        response = self.client.post(url, body)
+        self.assertEqual(response.status_code, 400)
+
+        body['email'] = 'a@a'
+        body['password'] = '123'
+
+        response = self.client.post(url, body)
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_is_active_by_default(self):
+        self.assertFalse(self.user.is_active)
+
+    def test_user_assign_email_on_creation(self):
+        self.assertEqual(self.user.email, 'ab@ab.com')
+
+    def test_user_assign_password_on_creation(self):
+        self.assertTrue(self.user.check_password('12345678'))
 
 
 class TestValidators(TestCase):
