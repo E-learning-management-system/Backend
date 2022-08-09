@@ -866,6 +866,94 @@ class TestSearch(TestBase):
         self.assertEqual(r_content[0].get('email'), 'b@gmail.com')
 
 
+class TestExercise(TestBase):
+    def test_create_new_exercise(self):
+        self.client.login(email='a@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.post(path=f'/soren/courses/{course.id}/newexercise/',
+                                    data={'title': 'Exercise 1', 'description': 'Nothing',
+                                          'deadline': '2020-05-05T05:13:10'})
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(r_content.get('title'), 'Exercise 1')
+        self.assertEqual(r_content.get('description'), 'Nothing')
+
+    def test_create_new_exercise_as_student_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        self.assertRaises(ValidationError, lambda: self.client.post(path=f'/soren/courses/{course.id}/newexercise/',
+                                                                    data={'title': 'Exercise 1',
+                                                                          'description': 'Nothing',
+                                                                          'deadline': '2020-05-05T05:13:10'}))
+
+    def test_create_new_exercise_as_invalid_teacher_should_fail(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        self.assertRaises(ValidationError, lambda: self.client.post(path=f'/soren/courses/{course.id}/newexercise/',
+                                                                    data={'title': 'Exercise 1',
+                                                                          'description': 'Nothing',
+                                                                          'deadline': '2020-05-05T05:13:10'}))
+
+    def test_view_exercises_as_student(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        exercise = Exercise.objects.create(title='Exercise 1', description='Nothing',
+                                           teacher=User.objects.get(email='a@gmail.com'),
+                                           deadline='2020-05-05T05:13:10', course=course)
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        response = self.client.get(path=f'/soren/courses/{course.id}/exercises/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content.get('results')[0].get('title'), exercise.title)
+        self.assertEqual(r_content.get('results')[0].get('description'), exercise.description)
+
+    def test_view_exercises_as_teacher(self):
+        self.client.login(email='a@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        exercise = Exercise.objects.create(title='Exercise 1', description='Nothing',
+                                           teacher=User.objects.get(email='a@gmail.com'),
+                                           deadline='2020-05-05T05:13:10', course=course)
+        response = self.client.get(path=f'/soren/courses/{course.id}/exercises/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content.get('results')[0].get('title'), exercise.title)
+        self.assertEqual(r_content.get('results')[0].get('description'), exercise.description)
+
+    def test_delete_exercise_as_teacher(self):
+        self.client.login(email='a@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        exercise = Exercise.objects.create(title='Exercise 1', description='Nothing',
+                                           teacher=User.objects.get(email='a@gmail.com'),
+                                           deadline='2020-05-05T05:13:10', course=course)
+        response = self.client.delete(path=f'/soren/exercise-rd/{exercise.id}/')
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_exercise_as_student_should_fail(self):
+        self.client.login(email='b@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        course.student.add(User.objects.get(email='b@gmail.com'))
+        exercise = Exercise.objects.create(title='Exercise 1', description='Nothing',
+                                           teacher=User.objects.get(email='a@gmail.com'),
+                                           deadline='2020-05-05T05:13:10', course=course)
+        self.assertRaises(ValidationError, lambda: self.client.delete(path=f'/soren/exercise-rd/{exercise.id}/'))
+
+
 import master.views as v
 
 
