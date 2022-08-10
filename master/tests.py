@@ -225,6 +225,16 @@ class TestCourseStudents(TestBase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(r_content, 'این دانشجو قبلا اضافه شده است')
 
+    def test_add_student_that_doesnt_exist(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        response = self.client.post(path=f'/soren/courses/{course.id}/newstudent/abc@gmail.com/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(r_content, 'کاربر موجود نیست. از طریق ایمیل به ایشان اطلاع داده خواهد شد')
+
     def test_delete_course_student_as_student_should_fail(self):
         self.client.login(email='b@gmail.com', password='abcd')
         course = Course.objects.create(title='Course 1', description='Nothing',
@@ -235,7 +245,19 @@ class TestCourseStudents(TestBase):
         response = self.client.get(f'/soren/student-rd/{CourseStudent.objects.get(user=user, course=course).id}/')
         r_content = json.loads(response.content)
         self.assertEqual(response.status_code, 403)
-        print(r_content)
+
+    def test_delete_course_student(self):
+        self.client.login(email='amir@gmail.com', password='abcd')
+        course = Course.objects.create(title='Course 1', description='Nothing',
+                                       teacher=User.objects.get(email='amir@gmail.com'), start_date='2020-05-05',
+                                       end_date='2020-05-06', exam_date='2020-05-07')
+        user = User.objects.get(email='b@gmail.com')
+        course.student.add(user)
+        response = self.client.get(f'/soren/student-rd/{CourseStudent.objects.get(user=user, course=course).id}/')
+        r_content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(r_content['id'], CourseStudent.objects.get(user=user, course=course).id)
+        self.assertEqual(r_content['email'], 'b@gmail.com')
 
 
 class TestSubjects(TestBase):
@@ -1082,6 +1104,7 @@ class TestExercise(TestBase):
                                            deadline='2020-05-05T05:13:10', course=course)
         response = self.client.get(path=f'/soren/exercise/{exercise.id}')
         self.assertEqual(response.status_code, 200)
+
 
 import master.views as v
 
