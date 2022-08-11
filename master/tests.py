@@ -469,17 +469,7 @@ class TestPosts(TestBase):
         self.assertEqual(r_content.get('title'), 'Title 1')
         self.assertEqual(r_content.get('description'), 'Post 1')
 
-    def test_add_post_in_another_course_should_fail(self):
-        self.client.login(email='amir@gmail.com', password='abcd')
-        course = Course.objects.create(title='Course 1', description='Nothing',
-                                       teacher=User.objects.get(email='a@gmail.com'), start_date='2020-05-05',
-                                       end_date='2020-05-06', exam_date='2020-05-07')
-        subject = Subject.objects.create(course=course, title='Subject 1')
-        response = self.client.post(path=f'/soren/subjects/{subject.id}/newpost/',
-                                    data={'title': 'Title 1', 'description': 'Post 1'})
-        r_content = json.loads(response.content)
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(r_content, 'شما به این عمل دسترسی ندارید')
+
 
     def test_view_no_posts(self):
         self.client.login(email='amir@gmail.com', password='abcd')
