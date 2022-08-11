@@ -469,8 +469,6 @@ class TestPosts(TestBase):
         self.assertEqual(r_content.get('title'), 'Title 1')
         self.assertEqual(r_content.get('description'), 'Post 1')
 
-
-
     def test_view_no_posts(self):
         self.client.login(email='amir@gmail.com', password='abcd')
         course = Course.objects.create(title='Course 1', description='Nothing',
@@ -934,6 +932,7 @@ class TestComments(TestBase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(r_content, 'شما به این عمل دسترسی ندارید')
 
+
 class TestSearch(TestBase):
     def test_search_course(self):
         self.client.login(email='amir@gmail.com', password='abcd')
@@ -1216,7 +1215,6 @@ class TestExercise(TestBase):
                                            deadline='2020-05-05T05:13:10', course=course)
         response = self.client.get(f'/soren/teacherexercises/')
         self.assertEqual(response.status_code, 200)
-
 
     def test_view_exercise_answers_as_teacher(self):
         self.client.login(email='a@gmail.com', password='abcd')
@@ -1581,3 +1579,12 @@ class TestValidators(TestCase):
     def test_validate_email_valid_form(self):
         sample_email = 'test@domain.com'
         self.assertIsNone(validate_email(sample_email))
+
+    def test_signup_a(self):
+        response = self.client.post('/signup/', data={"type": "s",
+                                                      "university": "string",
+                                                      "email": "amirvahdati16@gmail.com",
+                                                      "password": "aa_123456",
+                                                      "password_confirmation": "aa_123456"})
+        self.assertEqual(response.status_code, 201)
+        print(json.loads(response.content))
