@@ -413,8 +413,7 @@ class SavedPostsListCreate(generics.ListCreateAPIView):
                                   course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
             post.savedby.add(self.request.user)
             return Response('ذخیره شد', status=201)
-        else:
-            return Response('شما به این عمل دسترسی ندارید', status=403)
+
 
     def get_queryset(self):
         return self.request.user.post_set.all()
@@ -432,7 +431,7 @@ class RemoveSavedPosts(generics.ListCreateAPIView):
                 post.savedby.remove(self.request.user)
                 return Response('از حالت ذخیره خارج شد', status=201)
             except:
-                return Response('شما این پست را ذحیره نکرده اید', status=400)
+                return Response('شما این پست را ذخیره نکرده اید', status=400)
         elif self.request.user.type == 's':
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
                 get_object_or_404(CourseStudent, user=self.request.user,
@@ -441,9 +440,8 @@ class RemoveSavedPosts(generics.ListCreateAPIView):
                 post.savedby.remove(self.request.user)
                 return Response('از حالت ذخیره خارج شد', status=201)
             else:
-                return Response('شما این پست را ذخیره نکرده اید', status=403)
-        else:
-            return Response('شما به این عمل دسترسی ندارید', status=403)
+                return Response('شما این پست را ذخیره نکرده اید', status=400)
+
 
     def get_queryset(self):
         return self.request.user.post_set.all()
@@ -469,8 +467,7 @@ class LikeCreate(generics.CreateAPIView):
             if PostLike.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']), user=self.request.user).exists():
                 return Response('شما قبلا این پست را لایک کرده اید.', status=400)
 
-        else:
-            return Response('شما به این عمل دسترسی ندارید', status=403)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -518,8 +515,7 @@ class CommentCreate(generics.CreateAPIView):
                     get_object_or_404(CourseStudent, user=self.request.user,
                                       course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
             serializer.save(post=get_object_or_404(Post, pk=self.kwargs['pk']), user=self.request.user)
-        else:
-            return Response('شما به این عمل دسترسی ندارید', status=403)
+
 
 
 class CommentList(generics.ListAPIView):
@@ -538,21 +534,19 @@ class CommentDelete(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         if self.request.user.type == 't':
-            comment = PostComment.objects.get(pk=self.kwargs['pk'], post__subject__course__teacher=self.request.user)
-            if comment:
+            comment = PostComment.objects.filter(pk=self.kwargs['pk'], post__subject__course__teacher=self.request.user)
+            if comment.exists():
                 return self.destroy(self, request, *args, **kwargs)
             else:
                 return Response('شما به این عمل دسترسی ندارید', status=403)
 
         elif self.request.user.type == 's':
-            comment = PostComment.objects.get(pk=self.kwargs['pk'], user=self.request.user)
-            if comment:
+            comment = PostComment.objects.filter(pk=self.kwargs['pk'], user=self.request.user)
+            if comment.exists():
                 return self.destroy(self, request, *args, **kwargs)
             else:
                 return Response('شما به این عمل دسترسی ندارید', status=403)
 
-        else:
-            return Response('شما به این عمل دسترسی ندارید', status=403)
 
 
 class ExerciseList(generics.ListAPIView):
@@ -562,11 +556,9 @@ class ExerciseList(generics.ListAPIView):
 
     def get_queryset(self):
         if self.request.user.type == 't':
-            course = Course.objects.get(pk=self.kwargs['pk'], teacher=self.request.user)
-            if course:
-                return Exercise.objects.filter(course=Course.objects.get(pk=self.kwargs['pk']))
-            else:
-                raise ValidationError('شما به این عمل دسترسی ندارید')
+            course = get_object_or_404(Course, pk=self.kwargs['pk'], teacher=self.request.user)
+            return Exercise.objects.filter(course=Course.objects.get(pk=self.kwargs['pk']))
+
 
         elif self.request.user.type == 's':
             student = Course.objects.get(pk=self.kwargs['pk']).coursestudent_set.get(
@@ -705,9 +697,6 @@ class TeacherExerciseList(generics.ListAPIView):
     http_method_names = ['get']
     pagination_class = LargeResultsSetPagination
 
-    def perform_authentication(self, request):
-        if self.request.user.type != 't':
-            raise ValidationError('فقط اساتید میتوانند تمارین خود را ببینند')
 
     def get_queryset(self):
         return Exercise.objects.filter(teacher=self.request.user)
