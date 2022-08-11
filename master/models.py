@@ -38,6 +38,8 @@ TYPE_CHOICES = [
 class UserManager(BaseUserManager):
 
     def create_user(self, type=None, university=None, email=None, password=None):
+        if not type:
+            raise ValueError('Users must choose a type')
         if not university:
             raise ValueError('Users must have a university')
         if not email:

@@ -210,9 +210,9 @@ class LargeResultsSetPagination(PageNumberPagination):
 
 
 class CommentSetPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 4
     page_query_param = 'page_size'
-    max_page_size = 2
+    max_page_size = 4
 
 
 class CourseList(generics.ListAPIView):
@@ -377,7 +377,11 @@ class PostCreate(generics.CreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_authentication(self, request):
+    def perform_create(self, serializer):
+        subject = get_object_or_404(Subject, pk=self.kwargs['pk'])
+        serializer.save(subject=subject, user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
         if self.request.user.type == 't':
             if get_object_or_404(Subject, pk=self.kwargs['pk']).course.teacher != self.request.user:
                 return Response('شما به این عمل دسترسی ندارید', status=403)
@@ -385,9 +389,12 @@ class PostCreate(generics.CreateAPIView):
             subject = get_object_or_404(Subject, pk=self.kwargs['pk'])
             if subject.course not in self.request.user.course_set.all():
                 return Response('شما به این عمل دسترسی ندارید', status=403)
-
-    def perform_create(self, serializer):
-        serializer.save(subject=get_object_or_404(Subject, pk=self.kwargs['pk']), user=self.request.user)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
 
 class SavedPostsListCreate(generics.ListCreateAPIView):
@@ -448,11 +455,28 @@ class LikeCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['pk'])
-        like = PostLike.objects.filter(user=self.request.user, post=post)
-        if like.exists():
-            return Response('شما قبلا این پست را لایک کرده اید', status=400)
+        serializer.save(post=post, user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.type == 't':
+            post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
+            if PostLike.objects.filter(post=post, user=self.request.user).exists():
+                return Response('شما قبلا این پست را لایک کرده اید.', status=400)
+        elif self.request.user.type == 's':
+            post_auth = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
+                get_object_or_404(CourseStudent, user=self.request.user,
+                                  course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
+            if PostLike.objects.filter(post=Post.objects.get(pk=self.kwargs['pk']), user=self.request.user).exists():
+                return Response('شما قبلا این پست را لایک کرده اید.', status=400)
+
         else:
-            serializer.save(user=self.request.user, post=get_object_or_404(Post, pk=self.kwargs['pk']))
+            return Response('شما به این عمل دسترسی ندارید', status=403)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
 
 class LikeList(generics.ListAPIView):
@@ -461,7 +485,14 @@ class LikeList(generics.ListAPIView):
     pagination_class = LargeResultsSetPagination
 
     def get_queryset(self):
-        return PostLike.objects.filter(post=get_object_or_404(Post, pk=self.kwargs['pk']))
+        if self.request.user.type == 's':
+            return PostLike.objects.filter(
+                post=get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
+                    get_object_or_404(CourseStudent, user=self.request.user,
+                                      course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)]))
+        elif self.request.user.type == 't':
+            return PostLike.objects.filter(
+                post=get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user))
 
 
 class LikeDestroy(generics.DestroyAPIView):
@@ -483,8 +514,9 @@ class CommentCreate(generics.CreateAPIView):
             post = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__teacher=self.request.user)
             serializer.save(post=post, user=self.request.user)
         elif self.request.user.type == 's':
-            post_auth = get_object_or_404(Post, pk=self.kwargs['pk']).subject.course.coursestudent_set.get(
-                user=self.request.user)
+            post_auth = get_object_or_404(Post, pk=self.kwargs['pk'], subject__course__coursestudent__in=[
+                    get_object_or_404(CourseStudent, user=self.request.user,
+                                      course=get_object_or_404(Post, pk=self.kwargs['pk']).subject.course)])
             serializer.save(post=get_object_or_404(Post, pk=self.kwargs['pk']), user=self.request.user)
         else:
             return Response('شما به این عمل دسترسی ندارید', status=403)
